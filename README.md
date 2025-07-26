@@ -47,7 +47,10 @@ CREATE TABLE IF NOT EXISTS notification_settings (
 ```
 
 ## 🔧 环境变量配置
-
+### 管理员密码
+```
+PASSWORD
+```
 ### WebDAV 备份配置
 ```
 WEBDAV_URL
