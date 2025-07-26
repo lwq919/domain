@@ -460,6 +460,7 @@ const App: React.FC = () => {
         onBatchOperation={handleBatchOperation}
         onPageChange={setPage}
         onPageSizeChange={setPageSize}
+        onSearchChange={setSearch}
       />
 
       <button className="add-domain-btn" onClick={handleAdd}>+</button>
