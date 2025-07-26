@@ -1,22 +1,15 @@
-export interface Domain {
-  id?: number;
-  domain: string;
-  status: string;
-  registrar: string;
-  register_date: string;
-  expire_date: string;
-}
+import { Domain, DomainsResponse, NotificationSettingsResponse, NotificationSettingsRequest } from './types';
 
 export async function fetchDomains(): Promise<Domain[]> {
   const res = await fetch('/api/domains');
   const text = await res.text();
-  let data: any = {};
+  let data: DomainsResponse = { success: false };
   try {
-    data = text ? JSON.parse(text) : {};
+    data = text ? JSON.parse(text) : { success: false };
   } catch {
-    data = {};
+    data = { success: false };
   }
-  if (data.success) return data.domains;
+  if (data.success && data.domains) return data.domains;
   throw new Error(data.error || '获取域名失败');
 }
 
@@ -27,11 +20,11 @@ export async function saveDomains(domains: Domain[]): Promise<void> {
     body: JSON.stringify({ domains })
   });
   const text = await res.text();
-  let data: any = {};
+  let data: DomainsResponse = { success: false };
   try {
-    data = text ? JSON.parse(text) : {};
+    data = text ? JSON.parse(text) : { success: false };
   } catch {
-    data = {};
+    data = { success: false };
   }
   if (!data.success && text) throw new Error(data.error || '保存失败');
 }
@@ -43,11 +36,11 @@ export async function deleteDomain(domain: string): Promise<void> {
     body: JSON.stringify({ domain })
   });
   const text = await res.text();
-  let data: any = {};
+  let data: DomainsResponse = { success: false };
   try {
-    data = text ? JSON.parse(text) : {};
+    data = text ? JSON.parse(text) : { success: false };
   } catch {
-    data = {};
+    data = { success: false };
   }
   if (!data.success && text) throw new Error(data.error || '删除失败');
 }
@@ -60,12 +53,12 @@ export async function notifyExpiring(domains: Domain[]): Promise<void> {
   });
 }
 
-export async function fetchNotificationSettingsFromServer() {
+export async function fetchNotificationSettingsFromServer(): Promise<NotificationSettingsResponse> {
   const res = await fetch('/api/notify');
   return res.json();
 }
 
-export async function saveNotificationSettingsToServer(settings: any) {
+export async function saveNotificationSettingsToServer(settings: NotificationSettingsRequest): Promise<NotificationSettingsResponse> {
   const res = await fetch('/api/notify', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
