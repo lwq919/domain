@@ -31,7 +31,8 @@ CREATE TABLE IF NOT EXISTS domains (
   status TEXT NOT NULL,
   registrar TEXT NOT NULL,
   register_date TEXT NOT NULL,
-  expire_date TEXT NOT NULL
+  expire_date TEXT NOT NULL,
+  renewUrl TEXT
 );
 CREATE INDEX IF NOT EXISTS idx_domains_domain ON domains(domain);
 CREATE INDEX IF NOT EXISTS idx_domains_status ON domains(status);
