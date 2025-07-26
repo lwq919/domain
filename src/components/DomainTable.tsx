@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
 import { Domain, SortOrder, STATUS_LABELS } from '../types';
-import { calculateProgress, getProgressClass, getDaysLeft, getDaysColor, copyToClipboard } from '../utils';
-import { isMobile } from '../utils';
+import { calculateProgress, getProgressClass, getDaysLeft, getDaysColor, copyToClipboard, isMobile } from '../utils';
 
 interface DomainTableProps {
   domains: Domain[];
@@ -24,6 +23,7 @@ interface DomainTableProps {
   onBatchOperation: (operation: string) => void;
   onPageChange: (page: number) => void;
   onPageSizeChange: (size: number) => void;
+  onSearchChange: (search: string) => void;
 }
 
 const DomainTable: React.FC<DomainTableProps> = ({
@@ -46,7 +46,8 @@ const DomainTable: React.FC<DomainTableProps> = ({
   onCopy,
   onBatchOperation,
   onPageChange,
-  onPageSizeChange
+  onPageSizeChange,
+  onSearchChange
 }) => {
   const [scrollTop, setScrollTop] = useState(0);
 
@@ -105,7 +106,7 @@ const DomainTable: React.FC<DomainTableProps> = ({
           <input
             type="text"
             value={search}
-            onChange={e => {/* 搜索逻辑在父组件处理 */}}
+            onChange={e => onSearchChange(e.target.value)}
             placeholder="搜索域名..."
             style={{
               background: 'transparent',
