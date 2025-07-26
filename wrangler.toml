@@ -1,4 +1,4 @@
-name = "cfdomain"
+name = "domain"
 compatibility_date = "2025-06-04"
 
 [[d1_databases]]
@@ -7,4 +7,5 @@ database_name = "domain"
 
 [vars]
 TG_BOT_TOKEN = "${TG_BOT_TOKEN}"
-TG_USER_ID = "${TG_USER_ID}" 
+TG_USER_ID = "${TG_USER_ID}"
+PASSWORD = "${PASSWORD}" 
