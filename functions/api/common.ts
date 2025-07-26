@@ -8,6 +8,19 @@ export interface Domain {
   renewUrl?: string;
 }
 
+export function createErrorResponse(error: string, status: number = 500) {
+  return new Response(JSON.stringify({ success: false, error }), {
+    status,
+    headers: { 'content-type': 'application/json' }
+  });
+}
+
+export function createSuccessResponse(data: any = { success: true }) {
+  return new Response(JSON.stringify(data), {
+    headers: { 'content-type': 'application/json' }
+  });
+}
+
 export function validateDomain(domain: Domain): { valid: boolean; errors: string[] } {
   const errors: string[] = [];
   if (!domain.domain || domain.domain.trim() === '') {
@@ -29,19 +42,6 @@ export function validateDomain(domain: Domain): { valid: boolean; errors: string
     valid: errors.length === 0,
     errors
   };
-}
-
-export function createErrorResponse(error: string, status: number = 500) {
-  return new Response(JSON.stringify({ success: false, error }), {
-    status,
-    headers: { 'content-type': 'application/json' }
-  });
-}
-
-export function createSuccessResponse(data: any = { success: true }) {
-  return new Response(JSON.stringify(data), {
-    headers: { 'content-type': 'application/json' }
-  });
 }
 
 export function validateDomainsArray(domains: any[]): { valid: boolean; invalidDomains: any[] } {
