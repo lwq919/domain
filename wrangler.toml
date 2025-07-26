@@ -1,6 +1,8 @@
 name = "domain"
 compatibility_date = "2025-06-04"
 
+pages_build_output_dir = "dist"
+
 [[d1_databases]]
 binding = "DB"
 database_name = "domain"
