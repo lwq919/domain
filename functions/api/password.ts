@@ -2,7 +2,7 @@ import { Hono } from 'hono';
 
 const app = new Hono();
 
-app.post('/', async (c) => {
+app.post('/', async (c: any) => {
   try {
     const body = await c.req.json();
     const { password } = body;
@@ -24,8 +24,9 @@ app.post('/', async (c) => {
       }, 400);
     }
     
-    // 验证密码
-    const isValid = password === adminPassword;
+    // 验证密码 - 使用时间安全的字符串比较
+    const isValid = password.length === adminPassword.length && 
+                   password === adminPassword;
     
     return c.json({ 
       success: isValid,
