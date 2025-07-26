@@ -5,7 +5,8 @@ import {
   deleteDomain,
   notifyExpiring,
   fetchNotificationSettingsFromServer,
-  saveNotificationSettingsToServer
+  saveNotificationSettingsToServer,
+  verifyAdminPassword
 } from './api';
 import { Domain, defaultDomain, SortOrder, ExportFormat, NotificationMethod } from './types';
 import { 
@@ -27,6 +28,7 @@ import DomainModal from './components/DomainModal';
 import ConfirmModal from './components/ConfirmModal';
 import ExpireModal from './components/ExpireModal';
 import InfoModal from './components/InfoModal';
+import PasswordModal from './components/PasswordModal';
 
 const App: React.FC = () => {
   // 状态管理
@@ -50,6 +52,8 @@ const App: React.FC = () => {
   const [deleteModal, setDeleteModal] = useState(false);
   const [domainToDelete, setDomainToDelete] = useState<Domain | null>(null);
   const [batchDeleteModal, setBatchDeleteModal] = useState(false);
+  const [passwordModal, setPasswordModal] = useState(false);
+  const [passwordAction, setPasswordAction] = useState<'delete' | 'batchDelete' | null>(null);
   const [infoModal, setInfoModal] = useState(false);
   const [infoMessage, setInfoMessage] = useState('');
   const [infoTitle, setInfoTitle] = useState('');
@@ -254,7 +258,8 @@ const App: React.FC = () => {
 
   function handleDelete(index: number) {
     setDomainToDelete(domains[index]);
-    setDeleteModal(true);
+    setPasswordAction('delete');
+    setPasswordModal(true);
   }
 
   function handleRenew(domain: Domain) {
@@ -307,7 +312,8 @@ const App: React.FC = () => {
       showInfoModal('提示', '请先选择要删除的域名');
       return;
     }
-    setBatchDeleteModal(true);
+    setPasswordAction('batchDelete');
+    setPasswordModal(true);
   }
 
   async function confirmBatchDelete() {
@@ -346,6 +352,41 @@ const App: React.FC = () => {
 
   function handleFormChange(field: string, value: string) {
     setForm(prev => ({ ...prev, [field]: value }));
+  }
+
+  async function handlePasswordConfirm(password: string) {
+    try {
+      const isValid = await verifyAdminPassword(password);
+      
+      if (!isValid) {
+        showInfoModal('密码错误', '管理员密码不正确，请重试');
+        return;
+      }
+      
+      // 密码验证成功，执行相应的删除操作
+      if (passwordAction === 'delete' && domainToDelete) {
+        await deleteDomain(domainToDelete.domain);
+        await loadDomains();
+        setOpMsg('域名删除成功');
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+        setDomainToDelete(null);
+      } else if (passwordAction === 'batchDelete') {
+        setBatchDeleteModal(true);
+      }
+      
+      setPasswordModal(false);
+      setPasswordAction(null);
+      
+    } catch (error) {
+      console.error('密码验证失败:', error);
+      showInfoModal('验证失败', '密码验证过程中发生错误，请重试');
+    }
+  }
+
+  function handlePasswordCancel() {
+    setPasswordModal(false);
+    setPasswordAction(null);
+    setDomainToDelete(null);
   }
 
   async function confirmDelete() {
@@ -510,6 +551,19 @@ const App: React.FC = () => {
         title={infoTitle}
         message={infoMessage}
         onClose={() => setInfoModal(false)}
+      />
+
+      <PasswordModal
+        isOpen={passwordModal}
+        title="🔐 管理员验证"
+        message={passwordAction === 'delete' && domainToDelete 
+          ? `确定要删除域名 "${domainToDelete.domain}" 吗？此操作需要管理员权限。`
+          : `确定要批量删除选中的 ${selectedIndexes.length} 个域名吗？此操作需要管理员权限。`
+        }
+        onConfirm={handlePasswordConfirm}
+        onCancel={handlePasswordCancel}
+        confirmText="验证并删除"
+        cancelText="取消"
       />
     </div>
   );
