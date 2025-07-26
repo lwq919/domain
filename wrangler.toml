@@ -1,13 +1,4 @@
 name = "domain"
 compatibility_date = "2025-06-04"
 
-pages_build_output_dir = "dist"
-
-[[d1_databases]]
-binding = "DB"
-database_name = "domain"
-
-[vars]
-TG_BOT_TOKEN = "${TG_BOT_TOKEN}"
-TG_USER_ID = "${TG_USER_ID}"
-PASSWORD = "${PASSWORD}" 
+pages_build_output_dir = "dist" 
