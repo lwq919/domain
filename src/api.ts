@@ -65,4 +65,14 @@ export async function saveNotificationSettingsToServer(settings: NotificationSet
     body: JSON.stringify({ settings })
   });
   return res.json();
+}
+
+export async function verifyAdminPassword(password: string): Promise<boolean> {
+  const res = await fetch('/api/verify-password', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ password })
+  });
+  const data = await res.json();
+  return data.success === true;
 } 
