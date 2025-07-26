@@ -114,7 +114,10 @@ const App: React.FC = () => {
   useEffect(() => {
     if (bgImageUrl && bgImageUrl.trim() !== '') {
       document.body.style.backgroundImage = `url('${bgImageUrl}')`;
-      if (carouselTimer.current) clearInterval(carouselTimer.current);
+      if (carouselTimer.current) {
+        clearInterval(carouselTimer.current);
+        carouselTimer.current = null;
+      }
       return;
     }
     if (carouselImages.length === 0) return;
@@ -128,14 +131,20 @@ const App: React.FC = () => {
     }
     
     setBg(carouselIndex.current);
-    if (carouselTimer.current) clearInterval(carouselTimer.current);
+    if (carouselTimer.current) {
+      clearInterval(carouselTimer.current);
+      carouselTimer.current = null;
+    }
     carouselTimer.current = setInterval(() => {
       carouselIndex.current = (carouselIndex.current + 1) % carouselImages.length;
       setBg(carouselIndex.current);
     }, carouselInterval * 1000);
     
     return () => {
-      if (carouselTimer.current) clearInterval(carouselTimer.current);
+      if (carouselTimer.current) {
+        clearInterval(carouselTimer.current);
+        carouselTimer.current = null;
+      }
     };
   }, [bgImageUrl, carouselImages, carouselInterval]);
 
@@ -159,8 +168,9 @@ const App: React.FC = () => {
           console.error('检查到期域名时出错:', error);
         });
       }
-    } catch (error) {
-      setOpMsg('加载域名失败');
+    } catch (error: any) {
+      const errorMessage = error.message || '加载域名失败';
+      setOpMsg(`加载失败: ${errorMessage}`);
       console.error('加载域名失败:', error);
     } finally {
       setLoading(false);
@@ -180,8 +190,9 @@ const App: React.FC = () => {
           try { setNotificationMethods(JSON.parse(methods)); } catch { setNotificationMethods([]); }
         } else setNotificationMethods([]);
       }
-    } catch (error) {
+    } catch (error: any) {
       console.error('加载通知设置失败:', error);
+      // 静默失败，不影响主要功能
     }
   }
 
@@ -227,8 +238,9 @@ const App: React.FC = () => {
           setNotificationSentToday(true);
         }
       }
-    } catch (error) {
+    } catch (error: any) {
       console.error('检查到期域名时出错:', error);
+      // 静默失败，不影响主要功能
     }
   }
 
@@ -377,9 +389,10 @@ const App: React.FC = () => {
       setPasswordModal(false);
       setPasswordAction(null);
       
-    } catch (error) {
+    } catch (error: any) {
       console.error('密码验证失败:', error);
-      showInfoModal('验证失败', '密码验证过程中发生错误，请重试');
+      const errorMessage = error.message || '密码验证过程中发生错误';
+      showInfoModal('验证失败', `请重试: ${errorMessage}`);
     }
   }
 
