@@ -148,6 +148,16 @@ const App: React.FC = () => {
     };
   }, [bgImageUrl, carouselImages, carouselInterval]);
 
+  // 组件卸载时清理定时器
+  useEffect(() => {
+    return () => {
+      if (carouselTimer.current) {
+        clearInterval(carouselTimer.current);
+        carouselTimer.current = null;
+      }
+    };
+  }, []);
+
   // 检查到期域名
   useEffect(() => {
     if (!dontRemindToday && domains.length > 0) {
@@ -306,9 +316,9 @@ const App: React.FC = () => {
       return 'pending';
     };
     
-    const domainsToUpdate = selectedIndexes.map(idx => domains[idx]);
-    const newDomains = domains.map(d => {
-      const domainToUpdate = domainsToUpdate.find(updateDomain => updateDomain.domain === d.domain);
+    const domainsToUpdate = selectedIndexes.map((idx: number) => domains[idx]);
+    const newDomains = domains.map((d: Domain) => {
+      const domainToUpdate = domainsToUpdate.find((updateDomain: Domain) => updateDomain.domain === d.domain);
       return domainToUpdate ? { ...d, status: validStatus(status) } : d;
     });
     
@@ -329,8 +339,8 @@ const App: React.FC = () => {
   }
 
   async function confirmBatchDelete() {
-    const domainsToDelete = selectedIndexes.map(idx => domains[idx]);
-    const newDomains = domains.filter(domain => !domainsToDelete.some(d => d.domain === domain.domain));
+    const domainsToDelete = selectedIndexes.map((idx: number) => domains[idx]);
+    const newDomains = domains.filter((domain: Domain) => !domainsToDelete.some((d: Domain) => d.domain === domain.domain));
     await saveDomains(newDomains);
     setSelectedIndexes([]);
     await loadDomains();
