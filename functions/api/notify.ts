@@ -115,11 +115,19 @@ export const onRequest = async (context: any) => {
           const { results } = await env.DB.prepare(
             'SELECT notification_method FROM notification_settings LIMIT 1'
           ).all();
-          if (results.length > 0 && results[0].notification_method) {
-            const val = results[0].notification_method;
-            if (Array.isArray(val)) notifyMethods = val;
-            else if (typeof val === 'string') notifyMethods = JSON.parse(val);
+                  if (results.length > 0 && results[0].notification_method) {
+          const val = results[0].notification_method;
+          if (Array.isArray(val)) {
+            notifyMethods = val;
+          } else if (typeof val === 'string') {
+            try {
+              notifyMethods = JSON.parse(val);
+            } catch (error) {
+              console.error('解析通知方法失败:', error);
+              notifyMethods = ['telegram']; // 默认使用telegram
+            }
           }
+        }
         } catch {}
         if (!Array.isArray(notifyMethods) || notifyMethods.length === 0) notifyMethods = ['telegram'];
         const expiringDomains = body.domains.filter((domain: Domain) => isExpiringSoon(domain.expire_date, 15));
