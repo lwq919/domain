@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { getLogs, clearLogs } from '../api';
+import ConfirmModal from './ConfirmModal';
 
 interface LogEntry {
   id?: number;
@@ -29,6 +30,10 @@ const LogsModal: React.FC<LogsModalProps> = ({ isOpen, onClose }) => {
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
   const [clearLoading, setClearLoading] = useState(false);
+  const [confirmModal, setConfirmModal] = useState(false);
+  const [alertModal, setAlertModal] = useState(false);
+  const [alertMessage, setAlertMessage] = useState('');
+  const [alertType, setAlertType] = useState<'success' | 'error'>('success');
 
   const fetchLogs = async () => {
     setLoading(true);
@@ -53,24 +58,37 @@ const LogsModal: React.FC<LogsModalProps> = ({ isOpen, onClose }) => {
     }
   }, [isOpen, logType, currentPage]);
 
-  const handleClearLogs = async () => {
-    if (!confirm('确定要清理30天前的日志吗？此操作不可恢复。')) {
-      return;
-    }
+  const handleClearLogs = () => {
+    setConfirmModal(true);
+  };
 
+  const handleConfirmClearLogs = async () => {
+    setConfirmModal(false);
     setClearLoading(true);
     try {
       const response = await clearLogs(logType);
       if (response.success) {
-        alert('日志清理成功');
+        setAlertMessage('日志清理成功');
+        setAlertType('success');
+        setAlertModal(true);
         fetchLogs();
       }
     } catch (error) {
       console.error('清理日志失败:', error);
-      alert('清理日志失败');
+      setAlertMessage('清理日志失败');
+      setAlertType('error');
+      setAlertModal(true);
     } finally {
       setClearLoading(false);
     }
+  };
+
+  const handleCancelClearLogs = () => {
+    setConfirmModal(false);
+  };
+
+  const handleAlertClose = () => {
+    setAlertModal(false);
   };
 
   const getStatusColor = (status: string) => {
@@ -273,6 +291,29 @@ const LogsModal: React.FC<LogsModalProps> = ({ isOpen, onClose }) => {
           )}
         </div>
       </div>
+
+      {/* 确认清理日志模态框 */}
+      <ConfirmModal
+        isOpen={confirmModal}
+        title="清理日志确认"
+        message="确定要清理30天前的日志吗？此操作不可恢复。"
+        onConfirm={handleConfirmClearLogs}
+        onCancel={handleCancelClearLogs}
+        confirmText="确定清理"
+        cancelText="取消"
+        type="warning"
+      />
+
+      {/* 提示信息模态框 */}
+      <ConfirmModal
+        isOpen={alertModal}
+        title={alertType === 'success' ? '操作成功' : '操作失败'}
+        message={alertMessage}
+        onConfirm={handleAlertClose}
+        onCancel={handleAlertClose}
+        confirmText="确定"
+        type="alert"
+      />
     </div>
   );
 };
