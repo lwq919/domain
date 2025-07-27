@@ -16,6 +16,7 @@ interface LogEntry {
   notification_method?: string;
   message?: string;
   error_details?: string;
+  device_info?: string;
 }
 
 interface LogsModalProps {
@@ -26,7 +27,7 @@ interface LogsModalProps {
 const LogsModal: React.FC<LogsModalProps> = ({ isOpen, onClose }) => {
   const [logs, setLogs] = useState<LogEntry[]>([]);
   const [loading, setLoading] = useState(false);
-  const [logType, setLogType] = useState<'all' | 'operation' | 'notification'>('all');
+  const [logType, setLogType] = useState<'all' | 'operation' | 'notification' | 'access'>('all');
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
   const [clearLoading, setClearLoading] = useState(false);
@@ -145,6 +146,10 @@ const LogsModal: React.FC<LogsModalProps> = ({ isOpen, onClose }) => {
         return '📂';
       case 'export':
         return '📤';
+      case 'access':
+        return '🌐';
+      case 'login':
+        return '🔑';
       default:
         return '📝';
     }
@@ -173,13 +178,14 @@ const LogsModal: React.FC<LogsModalProps> = ({ isOpen, onClose }) => {
                 className="form-select" 
                 value={logType} 
                 onChange={(e) => {
-                  setLogType(e.target.value as any);
+                  setLogType(e.target.value as 'all' | 'operation' | 'notification' | 'access');
                   setCurrentPage(1);
                 }}
               >
                 <option value="all">全部日志</option>
                 <option value="operation">操作日志</option>
                 <option value="notification">通知日志</option>
+                <option value="access">访问日志</option>
               </select>
             </div>
             
@@ -249,6 +255,12 @@ const LogsModal: React.FC<LogsModalProps> = ({ isOpen, onClose }) => {
                       {log.error_details && (
                         <div className="log-error">
                           <strong>错误详情：</strong>{log.error_details}
+                        </div>
+                      )}
+                      
+                      {log.device_info && (
+                        <div className="log-device">
+                          <strong>设备信息：</strong>{log.device_info}
                         </div>
                       )}
                     </div>
