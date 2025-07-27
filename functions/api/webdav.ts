@@ -35,7 +35,7 @@ export const onRequest = async (context: any) => {
           url: webdavConfig.url,
           username: webdavConfig.username,
           password: webdavConfig.password,
-          path: webdavConfig.path || '/domains-backup.json'
+          path: webdavConfig.path || '/domain/domains-backup.json'
         };
       } else {
         // 从环境变量获取配置
@@ -51,7 +51,7 @@ export const onRequest = async (context: any) => {
           url: envUrl,
           username: envUser,
           password: envPass,
-          path: '/domains-backup.json'
+          path: '/domain/domains-backup.json'
         };
       }
 
@@ -92,9 +92,28 @@ async function handleBackup(env: any, config: WebDAVConfig): Promise<Response> {
     const backupContent = JSON.stringify(backupData, null, 2);
     const filename = `domains-backup-${new Date().toISOString().split('T')[0]}.json`;
 
-    // 上传到WebDAV
-    const uploadUrl = new URL(filename, config.url).toString();
+    // 确保domain文件夹存在
+    const domainFolderUrl = new URL('/domain/', config.url).toString();
     const auth = btoa(`${config.username}:${config.password}`);
+
+    // 尝试创建domain文件夹（如果不存在）
+    try {
+      const mkcolResponse = await fetch(domainFolderUrl, {
+        method: 'MKCOL',
+        headers: {
+          'Authorization': `Basic ${auth}`
+        }
+      });
+      // 如果文件夹已存在，会返回405 Method Not Allowed，这是正常的
+      if (!mkcolResponse.ok && mkcolResponse.status !== 405) {
+        console.warn(`创建domain文件夹失败: ${mkcolResponse.status} ${mkcolResponse.statusText}`);
+      }
+    } catch (error) {
+      console.warn('创建domain文件夹时出错:', error);
+    }
+
+    // 上传到WebDAV的domain文件夹
+    const uploadUrl = new URL(`/domain/${filename}`, config.url).toString();
 
     const uploadResponse = await fetch(uploadUrl, {
       method: 'PUT',
@@ -123,7 +142,7 @@ async function handleBackup(env: any, config: WebDAVConfig): Promise<Response> {
 
 async function handleRestore(env: any, config: WebDAVConfig): Promise<Response> {
   try {
-    // 从WebDAV下载备份文件
+    // 从WebDAV的domain文件夹下载备份文件
     const downloadUrl = new URL(config.path, config.url).toString();
     const auth = btoa(`${config.username}:${config.password}`);
 
