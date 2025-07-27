@@ -573,9 +573,9 @@ const App: React.FC = () => {
   }
 
   // WebDAV备份功能
-  async function handleWebDAVBackup(config: { url?: string; username?: string; password?: string; path?: string }) {
+  async function handleWebDAVBackup() {
     try {
-      const result = await webdavBackup(config);
+      const result = await webdavBackup({});
       showInfoModal('✅ WebDAV备份成功', `成功备份 ${result.domainsCount || 0} 个域名到 ${result.filename || 'WebDAV服务器'}`);
       setOpMsg('WebDAV备份成功');
     } catch (error) {
@@ -586,9 +586,9 @@ const App: React.FC = () => {
   }
 
   // WebDAV恢复功能
-  async function handleWebDAVRestore(config: { url?: string; username?: string; password?: string; path?: string }) {
+  async function handleWebDAVRestore() {
     try {
-      const result = await webdavRestore(config);
+      const result = await webdavRestore({});
       // 重新加载域名数据
       await loadDomains();
       showInfoModal('✅ WebDAV恢复成功', `成功恢复 ${result.domainsCount || 0} 个域名，备份时间: ${result.timestamp || '未知'}`);
