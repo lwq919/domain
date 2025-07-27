@@ -33,12 +33,10 @@ body {
     font-size: 2.5rem;
     margin-bottom: 10px;
     text-shadow: 0 2px 4px rgba(0,0,0,0.3);
-    background: linear-gradient(45deg, #667eea, #764ba2, #f093fb, #f5576c, #4facfe, #00f2fe);
-    background-size: 400% 400%;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;
-    animation: gradientShift 3s ease-in-out infinite;
     font-weight: bold;
 }
 .header p {
@@ -1200,11 +1198,7 @@ table td.loading {
     100% { transform: rotate(360deg); }
 }
 
-@keyframes gradientShift {
-    0% { background-position: 0% 50%; }
-    50% { background-position: 100% 50%; }
-    100% { background-position: 0% 50%; }
-}
+
 
 .logs-empty {
   display: flex;
