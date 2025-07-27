@@ -362,7 +362,7 @@ td {
     box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
 }
 .loading {
-    text-align: center;
+    text-align: center !important;
     padding: 40px;
     color: #666;
     display: flex;
