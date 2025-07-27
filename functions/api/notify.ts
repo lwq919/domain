@@ -194,6 +194,20 @@ export const onRequest = async (context: any) => {
                 body: JSON.stringify({ chat_id: chatId, text: message, parse_mode: 'HTML' })
               });
               if (!telegramResponse.ok) throw new Error('Telegram API请求失败');
+              
+              // 记录通知日志
+              for (const domain of expiringDomains) {
+                await env.DB.prepare(
+                  'INSERT INTO notification_logs (domain, notification_method, status, message, timestamp) VALUES (?, ?, ?, ?, ?)'
+                ).bind(
+                  domain.domain,
+                  'telegram',
+                  'sent',
+                  message,
+                  new Date().toISOString()
+                ).run();
+              }
+              
               results.push({ method: 'telegram', ok: true });
             } else if (method === 'wechat') {
               const sendKey = env.WECHAT_SENDKEY || settings.wechat_send_key;
@@ -256,6 +270,19 @@ export const onRequest = async (context: any) => {
               errors.push({ method, error: '不支持的通知方式' });
             }
           } catch (err: any) {
+            // 记录失败的通知日志
+            for (const domain of expiringDomains) {
+              await env.DB.prepare(
+                'INSERT INTO notification_logs (domain, notification_method, status, message, timestamp, error_details) VALUES (?, ?, ?, ?, ?, ?)'
+              ).bind(
+                domain.domain,
+                method,
+                'failed',
+                `通知发送失败: ${err.message}`,
+                new Date().toISOString(),
+                err.message || err
+              ).run();
+            }
             errors.push({ method, error: err.message || err });
           }
         }
