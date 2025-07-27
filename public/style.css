@@ -449,6 +449,24 @@ td {
     flex-wrap: wrap;
     gap: 12px;
     margin-top: 8px;
+    margin-bottom: 16px;
+}
+
+/* 通知配置样式 */
+.notification-config {
+    margin-top: 16px;
+    padding: 16px;
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 8px;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.notification-config .form-group {
+    margin-bottom: 16px;
+}
+
+.notification-config .form-group:last-child {
+    margin-bottom: 0;
 }
 
 .settings-modal-body .checkbox-group label {
