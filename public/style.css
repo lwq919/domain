@@ -608,14 +608,26 @@ td {
     font-weight: 500 !important;
     color: #fff !important;
     text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3) !important;
-    padding: 8px 0 !important;
+    padding: 12px 16px !important;
     margin-bottom: 0 !important;
+    background: rgba(255, 255, 255, 0.1) !important;
+    border-radius: 12px !important;
+    backdrop-filter: blur(10px) !important;
+    border: 1px solid rgba(255, 255, 255, 0.2) !important;
+    transition: all 0.3s ease !important;
+}
+
+.toggle-label:hover {
+    background: rgba(255, 255, 255, 0.15) !important;
+    border-color: rgba(255, 255, 255, 0.3) !important;
+    transform: translateY(-1px) !important;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1) !important;
 }
 
 .toggle-switch {
     position: relative;
-    width: 50px;
-    height: 26px;
+    width: 56px;
+    height: 30px;
 }
 
 .toggle-input {
@@ -631,50 +643,106 @@ td {
     left: 0 !important;
     right: 0 !important;
     bottom: 0 !important;
-    background: linear-gradient(135deg, rgba(255, 255, 255, 0.6), rgba(255, 255, 255, 0.4)) !important;
-    transition: 0.3s !important;
-    border-radius: 26px !important;
-    border: 2px solid rgba(255, 255, 255, 0.7) !important;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3), inset 0 1px 3px rgba(0, 0, 0, 0.1) !important;
+    background: linear-gradient(145deg, #e6e6e6, #ffffff) !important;
+    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1) !important;
+    border-radius: 30px !important;
+    border: 2px solid #e0e0e0 !important;
+    box-shadow: 
+        0 4px 12px rgba(0, 0, 0, 0.15),
+        inset 0 2px 4px rgba(255, 255, 255, 0.8),
+        inset 0 -2px 4px rgba(0, 0, 0, 0.1) !important;
 }
 
 .toggle-slider:before {
     position: absolute;
     content: "";
-    height: 20px;
-    width: 20px;
+    height: 24px;
+    width: 24px;
     left: 3px;
     bottom: 3px;
-    background: linear-gradient(135deg, #ffffff, #f5f5f5);
-    transition: 0.3s;
-    border-radius: 50%;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.4);
-    border: 2px solid rgba(255, 255, 255, 0.9);
+    background: linear-gradient(145deg, #ffffff, #f8f9fa) !important;
+    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1) !important;
+    border-radius: 50% !important;
+    box-shadow: 
+        0 4px 8px rgba(0, 0, 0, 0.2),
+        0 2px 4px rgba(0, 0, 0, 0.1),
+        inset 0 1px 2px rgba(255, 255, 255, 0.9) !important;
+    border: 1px solid rgba(255, 255, 255, 0.8) !important;
 }
 
 .toggle-input:checked + .toggle-slider {
-    background: linear-gradient(135deg, #4CAF50, #45a049);
-    border-color: #4CAF50;
-    box-shadow: 0 0 15px rgba(76, 175, 80, 0.4), inset 0 1px 3px rgba(0, 0, 0, 0.1);
+    background: linear-gradient(145deg, #10b981, #059669) !important;
+    border-color: #10b981 !important;
+    box-shadow: 
+        0 4px 16px rgba(16, 185, 129, 0.4),
+        inset 0 2px 4px rgba(255, 255, 255, 0.3),
+        inset 0 -2px 4px rgba(0, 0, 0, 0.1) !important;
 }
 
 .toggle-input:checked + .toggle-slider:before {
-    transform: translateX(24px);
+    transform: translateX(26px) !important;
+    background: linear-gradient(145deg, #ffffff, #f8f9fa) !important;
+    box-shadow: 
+        0 4px 8px rgba(0, 0, 0, 0.2),
+        0 2px 4px rgba(0, 0, 0, 0.1),
+        inset 0 1px 2px rgba(255, 255, 255, 0.9) !important;
+}
+
+/* 添加状态指示器 */
+.toggle-switch:after {
+    content: "OFF";
+    position: absolute;
+    right: -35px;
+    top: 50%;
+    transform: translateY(-50%);
+    font-size: 10px;
+    font-weight: 600;
+    color: #6b7280;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    transition: all 0.3s ease;
+}
+
+.toggle-input:checked + .toggle-switch:after {
+    content: "ON";
+    color: #10b981;
+    font-weight: 700;
 }
 
 .toggle-switch:hover .toggle-slider {
-    box-shadow: 0 0 15px rgba(255, 255, 255, 0.2);
+    transform: scale(1.02) !important;
+    box-shadow: 
+        0 6px 20px rgba(0, 0, 0, 0.2),
+        inset 0 2px 4px rgba(255, 255, 255, 0.8),
+        inset 0 -2px 4px rgba(0, 0, 0, 0.1) !important;
 }
 
 .toggle-input:checked + .toggle-slider:hover {
-    box-shadow: 0 0 15px rgba(76, 175, 80, 0.4);
+    transform: scale(1.02) !important;
+    box-shadow: 
+        0 6px 20px rgba(16, 185, 129, 0.5),
+        inset 0 2px 4px rgba(255, 255, 255, 0.3),
+        inset 0 -2px 4px rgba(0, 0, 0, 0.1) !important;
 }
 
 .toggle-text {
     font-size: 1rem;
-    font-weight: 500;
+    font-weight: 600;
     color: #fff;
     text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+    letter-spacing: 0.5px;
+    position: relative;
+    padding-left: 28px;
+}
+
+.toggle-text:before {
+    content: "🔔";
+    position: absolute;
+    left: 0;
+    top: 50%;
+    transform: translateY(-50%);
+    font-size: 1.1rem;
+    opacity: 0.9;
 }
 
 /* 表单元素美化 */
