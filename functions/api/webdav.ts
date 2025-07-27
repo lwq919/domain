@@ -23,6 +23,8 @@ export const onRequest = async (context: any) => {
       const body = await request.json();
       const { action, webdavConfig } = body;
 
+      console.log('WebDAV请求:', { action, hasWebDAVConfig: !!webdavConfig });
+
       if (!action) {
         return createErrorResponse('缺少操作类型', 400);
       }
@@ -37,11 +39,18 @@ export const onRequest = async (context: any) => {
           password: webdavConfig.password,
           path: webdavConfig.path || '/domain/domains-backup.json'
         };
+        console.log('使用传入的WebDAV配置');
       } else {
         // 从环境变量获取配置
         const envUrl = env.WEBDAV_URL;
         const envUser = env.WEBDAV_USER;
         const envPass = env.WEBDAV_PASS;
+        
+        console.log('环境变量检查:', { 
+          hasUrl: !!envUrl, 
+          hasUser: !!envUser, 
+          hasPass: !!envPass 
+        });
         
         if (!envUrl || !envUser || !envPass) {
           return createErrorResponse('WebDAV配置不完整，请检查环境变量或手动输入配置', 400);
@@ -53,6 +62,7 @@ export const onRequest = async (context: any) => {
           password: envPass,
           path: '/domain/domains-backup.json'
         };
+        console.log('使用环境变量WebDAV配置');
       }
 
       if (action === 'backup') {
@@ -92,8 +102,14 @@ async function handleBackup(env: any, config: WebDAVConfig): Promise<Response> {
     const backupContent = JSON.stringify(backupData, null, 2);
     const filename = `domains-backup-${new Date().toISOString().split('T')[0]}.json`;
 
+    // 确保WebDAV URL格式正确
+    let webdavUrl = config.url;
+    if (!webdavUrl.endsWith('/')) {
+      webdavUrl += '/';
+    }
+
     // 确保domain文件夹存在
-    const domainFolderUrl = new URL('/domain/', config.url).toString();
+    const domainFolderUrl = new URL('domain/', webdavUrl).toString();
     const auth = btoa(`${config.username}:${config.password}`);
 
     // 尝试创建domain文件夹（如果不存在）
@@ -113,7 +129,7 @@ async function handleBackup(env: any, config: WebDAVConfig): Promise<Response> {
     }
 
     // 上传到WebDAV的domain文件夹
-    const uploadUrl = new URL(`/domain/${filename}`, config.url).toString();
+    const uploadUrl = new URL(`domain/${filename}`, webdavUrl).toString();
 
     const uploadResponse = await fetch(uploadUrl, {
       method: 'PUT',
@@ -136,14 +152,21 @@ async function handleBackup(env: any, config: WebDAVConfig): Promise<Response> {
       domainsCount: domains?.length || 0
     });
   } catch (error: any) {
+    console.error('WebDAV备份错误:', error);
     return createErrorResponse(`备份失败: ${error.message}`, 500);
   }
 }
 
 async function handleRestore(env: any, config: WebDAVConfig): Promise<Response> {
   try {
+    // 确保WebDAV URL格式正确
+    let webdavUrl = config.url;
+    if (!webdavUrl.endsWith('/')) {
+      webdavUrl += '/';
+    }
+
     // 从WebDAV的domain文件夹下载备份文件
-    const downloadUrl = new URL(config.path, config.url).toString();
+    const downloadUrl = new URL(config.path.replace(/^\//, ''), webdavUrl).toString();
     const auth = btoa(`${config.username}:${config.password}`);
 
     const downloadResponse = await fetch(downloadUrl, {
@@ -201,6 +224,7 @@ async function handleRestore(env: any, config: WebDAVConfig): Promise<Response> 
       timestamp: backupData.timestamp
     });
   } catch (error: any) {
+    console.error('WebDAV恢复错误:', error);
     return createErrorResponse(`恢复失败: ${error.message}`, 500);
   }
 } 
