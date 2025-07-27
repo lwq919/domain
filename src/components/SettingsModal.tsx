@@ -1,5 +1,12 @@
-import React, { useState, useEffect } from 'react';
-import { NotificationMethod } from '../types';
+import React, { useState, useEffect, useRef } from 'react';
+import { NotificationMethod, Domain } from '../types';
+import { 
+  exportDomainsToJSON, 
+  exportDomainsToCSV, 
+  exportDomainsToTXT, 
+  importDomainsFromFile, 
+  validateDomainData 
+} from '../utils';
 
 interface SettingsModalProps {
   isOpen: boolean;
@@ -16,6 +23,7 @@ interface SettingsModalProps {
   wechatSendKey?: string;
   qqKey?: string;
   webhookUrl?: string;
+  domains: Domain[];
   onSave: (settings: {
     warningDays: string;
     notificationEnabled: string;
@@ -30,6 +38,7 @@ interface SettingsModalProps {
     qqKey?: string;
     webhookUrl?: string;
   }) => void;
+  onImportDomains: (domains: Domain[]) => void;
 }
 
 const SettingsModal: React.FC<SettingsModalProps> = ({
@@ -41,7 +50,9 @@ const SettingsModal: React.FC<SettingsModalProps> = ({
   notificationMethods,
   bgImageUrl,
   carouselInterval,
-  onSave
+  domains,
+  onSave,
+  onImportDomains
 }) => {
   const [form, setForm] = useState({
     warningDays,
@@ -57,6 +68,10 @@ const SettingsModal: React.FC<SettingsModalProps> = ({
     qqKey: '',
     webhookUrl: ''
   });
+
+  const [importError, setImportError] = useState<string>('');
+  const [importSuccess, setImportSuccess] = useState<string>('');
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     if (isOpen) {
@@ -76,6 +91,54 @@ const SettingsModal: React.FC<SettingsModalProps> = ({
       });
     }
   }, [isOpen, warningDays, notificationEnabled, notificationInterval, notificationMethods, bgImageUrl, carouselInterval]);
+
+  // 处理文件导入
+  const handleFileImport = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+
+    setImportError('');
+    setImportSuccess('');
+
+    try {
+      const importedDomains = await importDomainsFromFile(file);
+      const validation = validateDomainData(importedDomains);
+      
+      if (!validation.valid) {
+        setImportError(`数据验证失败:\n${validation.errors.join('\n')}`);
+        return;
+      }
+
+      onImportDomains(importedDomains);
+      setImportSuccess(`成功导入 ${importedDomains.length} 个域名`);
+      
+      // 清空文件输入
+      if (fileInputRef.current) {
+        fileInputRef.current.value = '';
+      }
+    } catch (error) {
+      setImportError(error instanceof Error ? error.message : '导入失败');
+    }
+  };
+
+  // 处理导出
+  const handleExport = (format: 'json' | 'csv' | 'txt') => {
+    try {
+      switch (format) {
+        case 'json':
+          exportDomainsToJSON(domains);
+          break;
+        case 'csv':
+          exportDomainsToCSV(domains);
+          break;
+        case 'txt':
+          exportDomainsToTXT(domains);
+          break;
+      }
+    } catch (error) {
+      setImportError('导出失败');
+    }
+  };
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -330,6 +393,89 @@ const SettingsModal: React.FC<SettingsModalProps> = ({
                   onChange={e => setForm(prev => ({ ...prev, carouselInterval: Number(e.target.value) }))}
                 />
               </div>
+            </div>
+
+            {/* 数据导入/导出 */}
+            <div className="settings-section">
+              <h3>📁 数据管理</h3>
+              
+              {/* 导出功能 */}
+              <div className="form-group">
+                <label className="form-label">导出域名数据：</label>
+                <div className="export-buttons">
+                  <button
+                    type="button"
+                    className="btn btn-export"
+                    onClick={() => handleExport('json')}
+                    disabled={domains.length === 0}
+                  >
+                    📄 JSON
+                  </button>
+                  <button
+                    type="button"
+                    className="btn btn-export"
+                    onClick={() => handleExport('csv')}
+                    disabled={domains.length === 0}
+                  >
+                    📊 CSV
+                  </button>
+                  <button
+                    type="button"
+                    className="btn btn-export"
+                    onClick={() => handleExport('txt')}
+                    disabled={domains.length === 0}
+                  >
+                    📝 TXT
+                  </button>
+                </div>
+                <small className="form-hint">支持导出为JSON、CSV、TXT格式</small>
+              </div>
+
+              {/* 导入功能 */}
+              <div className="form-group">
+                <label className="form-label">导入域名数据：</label>
+                <div className="import-section">
+                  <input
+                    ref={fileInputRef}
+                    type="file"
+                    accept=".json,.csv,.txt"
+                    onChange={handleFileImport}
+                    className="file-input"
+                    style={{ display: 'none' }}
+                  />
+                  <button
+                    type="button"
+                    className="btn btn-import"
+                    onClick={() => fileInputRef.current?.click()}
+                  >
+                    📂 选择文件
+                  </button>
+                  <span className="import-hint">支持JSON、CSV、TXT格式</span>
+                </div>
+                <small className="form-hint">导入的数据将替换当前所有域名数据</small>
+              </div>
+
+              {/* 导入结果提示 */}
+              {importError && (
+                <div className="import-error">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="2"/>
+                    <line x1="15" y1="9" x2="9" y2="15" stroke="currentColor" strokeWidth="2"/>
+                    <line x1="9" y1="9" x2="15" y2="15" stroke="currentColor" strokeWidth="2"/>
+                  </svg>
+                  <span>{importError}</span>
+                </div>
+              )}
+
+              {importSuccess && (
+                <div className="import-success">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                    <polyline points="22,4 12,14.01 9,11.01" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                  </svg>
+                  <span>{importSuccess}</span>
+                </div>
+              )}
             </div>
           </div>
 
