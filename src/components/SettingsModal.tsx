@@ -8,7 +8,6 @@ import {
   validateDomainData 
 } from '../utils';
 import { verifyAdminPassword } from '../api';
-import LogsModal from './LogsModal';
 import PasswordModal from './PasswordModal';
 
 interface SettingsModalProps {
@@ -44,6 +43,7 @@ interface SettingsModalProps {
   onImportDomains: (domains: Domain[]) => void;
   onWebDAVBackup?: () => Promise<void>;
   onWebDAVRestore?: () => Promise<void>;
+  onOpenLogs?: () => void;
 }
 
 const SettingsModal: React.FC<SettingsModalProps> = ({
@@ -59,7 +59,8 @@ const SettingsModal: React.FC<SettingsModalProps> = ({
   onSave,
   onImportDomains,
   onWebDAVBackup,
-  onWebDAVRestore
+  onWebDAVRestore,
+  onOpenLogs
 }) => {
   const [form, setForm] = useState({
     warningDays,
@@ -81,7 +82,6 @@ const SettingsModal: React.FC<SettingsModalProps> = ({
   const [webdavError, setWebdavError] = useState<string>('');
   const [webdavSuccess, setWebdavSuccess] = useState<string>('');
   const [webdavLoading, setWebdavLoading] = useState(false);
-  const [logsModal, setLogsModal] = useState(false);
   const [passwordModal, setPasswordModal] = useState(false);
 
   // 注意：环境变量配置现在由后端API处理
@@ -217,7 +217,9 @@ const SettingsModal: React.FC<SettingsModalProps> = ({
       
       // 密码验证成功，打开日志模态框
       setPasswordModal(false);
-      setLogsModal(true);
+      if (onOpenLogs) {
+        onOpenLogs();
+      }
       
     } catch (error: any) {
       console.error('密码验证失败:', error);
@@ -562,12 +564,6 @@ const SettingsModal: React.FC<SettingsModalProps> = ({
             <small className="form-hint">查看操作日志和通知日志，支持筛选和清理功能</small>
           </div>
         </div>
-
-        {/* 日志模态框 */}
-        <LogsModal
-          isOpen={logsModal}
-          onClose={() => setLogsModal(false)}
-        />
 
         {/* 密码验证模态框 */}
         <PasswordModal
