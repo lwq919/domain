@@ -10,6 +10,12 @@ interface SettingsModalProps {
   notificationMethods: NotificationMethod[];
   bgImageUrl: string;
   carouselInterval: number;
+  emailConfig?: string;
+  telegramBotToken?: string;
+  telegramChatId?: string;
+  wechatSendKey?: string;
+  qqKey?: string;
+  webhookUrl?: string;
   onSave: (settings: {
     warningDays: string;
     notificationEnabled: string;
@@ -17,6 +23,12 @@ interface SettingsModalProps {
     notificationMethods: NotificationMethod[];
     bgImageUrl: string;
     carouselInterval: number;
+    emailConfig?: string;
+    telegramBotToken?: string;
+    telegramChatId?: string;
+    wechatSendKey?: string;
+    qqKey?: string;
+    webhookUrl?: string;
   }) => void;
 }
 
@@ -37,7 +49,13 @@ const SettingsModal: React.FC<SettingsModalProps> = ({
     notificationInterval,
     notificationMethods: [...notificationMethods],
     bgImageUrl,
-    carouselInterval
+    carouselInterval,
+    emailConfig: '',
+    telegramBotToken: '',
+    telegramChatId: '',
+    wechatSendKey: '',
+    qqKey: '',
+    webhookUrl: ''
   });
 
   useEffect(() => {
@@ -48,7 +66,13 @@ const SettingsModal: React.FC<SettingsModalProps> = ({
         notificationInterval,
         notificationMethods: [...notificationMethods],
         bgImageUrl,
-        carouselInterval
+        carouselInterval,
+        emailConfig: '',
+        telegramBotToken: '',
+        telegramChatId: '',
+        wechatSendKey: '',
+        qqKey: '',
+        webhookUrl: ''
       });
     }
   }, [isOpen, warningDays, notificationEnabled, notificationInterval, notificationMethods, bgImageUrl, carouselInterval]);
@@ -145,6 +169,33 @@ const SettingsModal: React.FC<SettingsModalProps> = ({
                   <label>
                     <input
                       type="checkbox"
+                      checked={form.notificationMethods.includes('telegram')}
+                      onChange={e => handleNotificationMethodChange('telegram', e.target.checked)}
+                      disabled={form.notificationEnabled !== 'true'}
+                    />
+                    📱 Telegram
+                  </label>
+                  <label>
+                    <input
+                      type="checkbox"
+                      checked={form.notificationMethods.includes('wechat')}
+                      onChange={e => handleNotificationMethodChange('wechat', e.target.checked)}
+                      disabled={form.notificationEnabled !== 'true'}
+                    />
+                    💬 微信 (Server酱)
+                  </label>
+                  <label>
+                    <input
+                      type="checkbox"
+                      checked={form.notificationMethods.includes('qq')}
+                      onChange={e => handleNotificationMethodChange('qq', e.target.checked)}
+                      disabled={form.notificationEnabled !== 'true'}
+                    />
+                    🐧 QQ (Qmsg酱)
+                  </label>
+                  <label>
+                    <input
+                      type="checkbox"
                       checked={form.notificationMethods.includes('webhook')}
                       onChange={e => handleNotificationMethodChange('webhook', e.target.checked)}
                       disabled={form.notificationEnabled !== 'true'}
@@ -153,6 +204,103 @@ const SettingsModal: React.FC<SettingsModalProps> = ({
                   </label>
                 </div>
               </div>
+
+              {/* 通知配置区域 */}
+              {(form.notificationMethods.includes('email') || 
+                form.notificationMethods.includes('telegram') || 
+                form.notificationMethods.includes('wechat') || 
+                form.notificationMethods.includes('qq') || 
+                form.notificationMethods.includes('webhook')) && (
+                <div className="notification-config">
+                  {/* 邮件配置 */}
+                  {form.notificationMethods.includes('email') && (
+                    <div className="form-group">
+                      <label className="form-label">📧 邮件配置：</label>
+                      <input
+                        type="email"
+                        className="form-input"
+                        placeholder="接收通知的邮箱地址"
+                        value={form.emailConfig || ''}
+                        onChange={e => setForm(prev => ({ ...prev, emailConfig: e.target.value }))}
+                        disabled={form.notificationEnabled !== 'true'}
+                      />
+                      <small className="form-hint">请输入接收通知的邮箱地址</small>
+                    </div>
+                  )}
+
+                  {/* Telegram配置 */}
+                  {form.notificationMethods.includes('telegram') && (
+                    <div className="form-group">
+                      <label className="form-label">📱 Telegram配置：</label>
+                      <input
+                        type="text"
+                        className="form-input"
+                        placeholder="Bot Token"
+                        value={form.telegramBotToken || ''}
+                        onChange={e => setForm(prev => ({ ...prev, telegramBotToken: e.target.value }))}
+                        disabled={form.notificationEnabled !== 'true'}
+                      />
+                      <input
+                        type="text"
+                        className="form-input"
+                        placeholder="Chat ID"
+                        value={form.telegramChatId || ''}
+                        onChange={e => setForm(prev => ({ ...prev, telegramChatId: e.target.value }))}
+                        disabled={form.notificationEnabled !== 'true'}
+                      />
+                      <small className="form-hint">请配置Bot Token和Chat ID</small>
+                    </div>
+                  )}
+
+                  {/* 微信配置 */}
+                  {form.notificationMethods.includes('wechat') && (
+                    <div className="form-group">
+                      <label className="form-label">💬 微信配置：</label>
+                      <input
+                        type="text"
+                        className="form-input"
+                        placeholder="Server酱 SendKey"
+                        value={form.wechatSendKey || ''}
+                        onChange={e => setForm(prev => ({ ...prev, wechatSendKey: e.target.value }))}
+                        disabled={form.notificationEnabled !== 'true'}
+                      />
+                      <small className="form-hint">请输入Server酱的SendKey</small>
+                    </div>
+                  )}
+
+                  {/* QQ配置 */}
+                  {form.notificationMethods.includes('qq') && (
+                    <div className="form-group">
+                      <label className="form-label">🐧 QQ配置：</label>
+                      <input
+                        type="text"
+                        className="form-input"
+                        placeholder="Qmsg酱 Key"
+                        value={form.qqKey || ''}
+                        onChange={e => setForm(prev => ({ ...prev, qqKey: e.target.value }))}
+                        disabled={form.notificationEnabled !== 'true'}
+                      />
+                      <small className="form-hint">请输入Qmsg酱的Key</small>
+                    </div>
+                  )}
+
+                  {/* Webhook配置 */}
+                  {form.notificationMethods.includes('webhook') && (
+                    <div className="form-group">
+                      <label className="form-label">🔗 Webhook配置：</label>
+                      <input
+                        type="url"
+                        className="form-input"
+                        placeholder="Webhook URL"
+                        value={form.webhookUrl || ''}
+                        onChange={e => setForm(prev => ({ ...prev, webhookUrl: e.target.value }))}
+                        disabled={form.notificationEnabled !== 'true'}
+                      />
+                      <small className="form-hint">请输入Webhook的URL地址</small>
+                    </div>
+                  )}
+                </div>
+              )}
             </div>
 
             {/* 背景设置 */}
