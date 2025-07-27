@@ -309,7 +309,7 @@ const LogsModal: React.FC<LogsModalProps> = ({ isOpen, onClose }) => {
       <ConfirmModal
         isOpen={confirmModal}
         title="清理日志确认"
-        message="确定要清理30天前的日志吗？此操作不可恢复。"
+        message={`确定要清理所有${logType === 'all' ? '' : logType === 'operation' ? '操作' : logType === 'notification' ? '通知' : '访问'}日志吗？此操作不可恢复。`}
         onConfirm={handleConfirmClearLogs}
         onCancel={handleCancelClearLogs}
         confirmText="确定清理"
