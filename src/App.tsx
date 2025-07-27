@@ -6,7 +6,9 @@ import {
   notifyExpiring,
   fetchNotificationSettingsFromServer,
   saveNotificationSettingsToServer,
-  verifyAdminPassword
+  verifyAdminPassword,
+  webdavBackup,
+  webdavRestore
 } from './api';
 import { Domain, defaultDomain, SortOrder, ExportFormat, NotificationMethod } from './types';
 import { 
@@ -570,6 +572,34 @@ const App: React.FC = () => {
     }
   }
 
+  // WebDAV备份功能
+  async function handleWebDAVBackup(config: { url?: string; username?: string; password?: string; path?: string }) {
+    try {
+      const result = await webdavBackup(config);
+      showInfoModal('✅ WebDAV备份成功', `成功备份 ${result.domainsCount || 0} 个域名到 ${result.filename || 'WebDAV服务器'}`);
+      setOpMsg('WebDAV备份成功');
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : '备份失败';
+      showInfoModal('❌ WebDAV备份失败', errorMessage);
+      throw error;
+    }
+  }
+
+  // WebDAV恢复功能
+  async function handleWebDAVRestore(config: { url?: string; username?: string; password?: string; path?: string }) {
+    try {
+      const result = await webdavRestore(config);
+      // 重新加载域名数据
+      await loadDomains();
+      showInfoModal('✅ WebDAV恢复成功', `成功恢复 ${result.domainsCount || 0} 个域名，备份时间: ${result.timestamp || '未知'}`);
+      setOpMsg('WebDAV恢复成功');
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : '恢复失败';
+      showInfoModal('❌ WebDAV恢复失败', errorMessage);
+      throw error;
+    }
+  }
+
   // 全局操作消息组件
   const GlobalOpMsg = opMsg ? (
     <div style={{
@@ -718,6 +748,8 @@ const App: React.FC = () => {
         domains={domains}
         onSave={handleSettingsSave}
         onImportDomains={handleImportDomains}
+        onWebDAVBackup={handleWebDAVBackup}
+        onWebDAVRestore={handleWebDAVRestore}
       />
     </div>
   );
