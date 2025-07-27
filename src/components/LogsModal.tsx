@@ -135,8 +135,8 @@ const LogsModal: React.FC<LogsModalProps> = ({ isOpen, onClose }) => {
   if (!isOpen) return null;
 
   return (
-    <div className="modal-overlay logs-modal-overlay">
-      <div className="modal-content logs-modal-content">
+    <div className="logs-modal-overlay" onClick={onClose}>
+      <div className="logs-modal-content" onClick={(e) => e.stopPropagation()}>
         <div className="modal-header logs-modal-header">
           <h2>📋 系统日志</h2>
           <button className="modal-close logs-modal-close" onClick={onClose}>
