@@ -39,6 +39,8 @@ interface SettingsModalProps {
     webhookUrl?: string;
   }) => void;
   onImportDomains: (domains: Domain[]) => void;
+  onWebDAVBackup?: (config: { url?: string; username?: string; password?: string; path?: string }) => Promise<void>;
+  onWebDAVRestore?: (config: { url?: string; username?: string; password?: string; path?: string }) => Promise<void>;
 }
 
 const SettingsModal: React.FC<SettingsModalProps> = ({
@@ -52,7 +54,9 @@ const SettingsModal: React.FC<SettingsModalProps> = ({
   carouselInterval,
   domains,
   onSave,
-  onImportDomains
+  onImportDomains,
+  onWebDAVBackup,
+  onWebDAVRestore
 }) => {
   const [form, setForm] = useState({
     warningDays,
@@ -71,6 +75,44 @@ const SettingsModal: React.FC<SettingsModalProps> = ({
 
   const [importError, setImportError] = useState<string>('');
   const [importSuccess, setImportSuccess] = useState<string>('');
+  const [webdavError, setWebdavError] = useState<string>('');
+  const [webdavSuccess, setWebdavSuccess] = useState<string>('');
+  const [webdavLoading, setWebdavLoading] = useState(false);
+  const [webdavConfig, setWebdavConfig] = useState({
+    url: '',
+    username: '',
+    password: '',
+    path: '/domains-backup.json'
+  });
+
+  // 从环境变量加载WebDAV配置
+  useEffect(() => {
+    const loadWebDAVConfig = async () => {
+      try {
+        // 尝试从环境变量获取配置
+        const envConfig = {
+          url: import.meta.env.VITE_WEBDAV_URL || '',
+          username: import.meta.env.VITE_WEBDAV_USER || '',
+          password: import.meta.env.VITE_WEBDAV_PASS || ''
+        };
+        
+        if (envConfig.url && envConfig.username && envConfig.password) {
+          setWebdavConfig(prev => ({
+            ...prev,
+            url: envConfig.url,
+            username: envConfig.username,
+            password: envConfig.password
+          }));
+        }
+      } catch (error) {
+        console.log('无法从环境变量加载WebDAV配置');
+      }
+    };
+
+    if (isOpen) {
+      loadWebDAVConfig();
+    }
+  }, [isOpen]);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
@@ -137,6 +179,64 @@ const SettingsModal: React.FC<SettingsModalProps> = ({
       }
     } catch (error) {
       setImportError('导出失败');
+    }
+  };
+
+  // 处理WebDAV备份
+  const handleWebDAVBackup = async () => {
+    // 检查是否有配置（手动输入或环境变量）
+    const hasManualConfig = webdavConfig.url && webdavConfig.username && webdavConfig.password;
+    const hasEnvConfig = import.meta.env.VITE_WEBDAV_URL && import.meta.env.VITE_WEBDAV_USER && import.meta.env.VITE_WEBDAV_PASS;
+    
+    if (!hasManualConfig && !hasEnvConfig) {
+      setWebdavError('请填写完整的WebDAV配置信息或配置环境变量');
+      return;
+    }
+
+    setWebdavLoading(true);
+    setWebdavError('');
+    setWebdavSuccess('');
+
+    try {
+      if (onWebDAVBackup) {
+        // 如果有手动配置就使用手动配置，否则传递空对象让后端使用环境变量
+        const config = hasManualConfig ? webdavConfig : {};
+        await onWebDAVBackup(config);
+        setWebdavSuccess('WebDAV备份成功');
+      }
+    } catch (error) {
+      setWebdavError(error instanceof Error ? error.message : '备份失败');
+    } finally {
+      setWebdavLoading(false);
+    }
+  };
+
+  // 处理WebDAV恢复
+  const handleWebDAVRestore = async () => {
+    // 检查是否有配置（手动输入或环境变量）
+    const hasManualConfig = webdavConfig.url && webdavConfig.username && webdavConfig.password;
+    const hasEnvConfig = import.meta.env.VITE_WEBDAV_URL && import.meta.env.VITE_WEBDAV_USER && import.meta.env.VITE_WEBDAV_PASS;
+    
+    if (!hasManualConfig && !hasEnvConfig) {
+      setWebdavError('请填写完整的WebDAV配置信息或配置环境变量');
+      return;
+    }
+
+    setWebdavLoading(true);
+    setWebdavError('');
+    setWebdavSuccess('');
+
+    try {
+      if (onWebDAVRestore) {
+        // 如果有手动配置就使用手动配置，否则传递空对象让后端使用环境变量
+        const config = hasManualConfig ? webdavConfig : {};
+        await onWebDAVRestore(config);
+        setWebdavSuccess('WebDAV恢复成功');
+      }
+    } catch (error) {
+      setWebdavError(error instanceof Error ? error.message : '恢复失败');
+    } finally {
+      setWebdavLoading(false);
     }
   };
 
@@ -474,6 +574,102 @@ const SettingsModal: React.FC<SettingsModalProps> = ({
                     <polyline points="22,4 12,14.01 9,11.01" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
                   </svg>
                   <span>{importSuccess}</span>
+                </div>
+              )}
+            </div>
+
+            {/* WebDAV备份/恢复 */}
+            <div className="settings-section">
+              <h3>☁️ WebDAV备份/恢复</h3>
+              
+              <div className="form-group">
+                <label className="form-label">WebDAV服务器地址：</label>
+                <input
+                  type="url"
+                  className="form-input"
+                  placeholder="https://your-webdav-server.com"
+                  value={webdavConfig.url}
+                  onChange={e => setWebdavConfig(prev => ({ ...prev, url: e.target.value }))}
+                />
+                <small className="form-hint">请输入WebDAV服务器的完整URL，或配置环境变量自动填充</small>
+              </div>
+
+              <div className="form-group">
+                <label className="form-label">用户名：</label>
+                <input
+                  type="text"
+                  className="form-input"
+                  placeholder="WebDAV用户名"
+                  value={webdavConfig.username}
+                  onChange={e => setWebdavConfig(prev => ({ ...prev, username: e.target.value }))}
+                />
+              </div>
+
+              <div className="form-group">
+                <label className="form-label">密码：</label>
+                <input
+                  type="password"
+                  className="form-input"
+                  placeholder="WebDAV密码"
+                  value={webdavConfig.password}
+                  onChange={e => setWebdavConfig(prev => ({ ...prev, password: e.target.value }))}
+                />
+              </div>
+
+              <div className="form-group">
+                <label className="form-label">备份文件路径：</label>
+                <input
+                  type="text"
+                  className="form-input"
+                  placeholder="/domains-backup.json"
+                  value={webdavConfig.path}
+                  onChange={e => setWebdavConfig(prev => ({ ...prev, path: e.target.value }))}
+                />
+                <small className="form-hint">备份文件在WebDAV服务器上的路径</small>
+              </div>
+
+              <div className="form-group">
+                <label className="form-label">操作：</label>
+                <div className="webdav-buttons">
+                  <button
+                    type="button"
+                    className="btn btn-backup"
+                    onClick={handleWebDAVBackup}
+                    disabled={webdavLoading || (!webdavConfig.url && !import.meta.env.VITE_WEBDAV_URL)}
+                  >
+                    {webdavLoading ? '🔄 备份中...' : '💾 备份到WebDAV'}
+                  </button>
+                  <button
+                    type="button"
+                    className="btn btn-restore"
+                    onClick={handleWebDAVRestore}
+                    disabled={webdavLoading || (!webdavConfig.url && !import.meta.env.VITE_WEBDAV_URL)}
+                  >
+                    {webdavLoading ? '🔄 恢复中...' : '📥 从WebDAV恢复'}
+                  </button>
+                </div>
+                <small className="form-hint">备份包含域名数据和通知设置，恢复将覆盖当前所有数据</small>
+              </div>
+
+              {/* WebDAV操作结果提示 */}
+              {webdavError && (
+                <div className="webdav-error">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="2"/>
+                    <line x1="15" y1="9" x2="9" y2="15" stroke="currentColor" strokeWidth="2"/>
+                    <line x1="9" y1="9" x2="15" y2="15" stroke="currentColor" strokeWidth="2"/>
+                  </svg>
+                  <span>{webdavError}</span>
+                </div>
+              )}
+
+              {webdavSuccess && (
+                <div className="webdav-success">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                    <polyline points="22,4 12,14.01 9,11.01" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                  </svg>
+                  <span>{webdavSuccess}</span>
                 </div>
               )}
             </div>
