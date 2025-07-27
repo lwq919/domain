@@ -1400,6 +1400,11 @@ table td.loading {
   box-shadow: none;
 }
 
+.btn-page:active:not(:disabled) {
+  transform: translateY(0);
+  box-shadow: 0 2px 4px rgba(240, 147, 251, 0.3);
+}
+
 .page-info {
   color: rgba(255, 255, 255, 0.8);
   font-weight: 500;
@@ -1770,6 +1775,11 @@ table td.loading {
     transform: none;
     background: linear-gradient(135deg, #ccc 0%, #999 100%);
     box-shadow: none;
+}
+
+.btn-pagination:active:not(:disabled) {
+    transform: translateY(0);
+    box-shadow: 0 2px 4px rgba(240, 147, 251, 0.3);
 }
 
 .webdav-error {
