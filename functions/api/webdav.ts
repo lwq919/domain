@@ -89,7 +89,7 @@ async function handleBackup(env: any, config: WebDAVConfig): Promise<Response> {
 
     // 获取通知设置
     const { results: settings } = await env.DB.prepare(
-      'SELECT * FROM notification_settings LIMIT 1'
+      'SELECT warning_days as warningDays, notification_enabled as notificationEnabled, notification_interval as notificationInterval, notification_method as notificationMethod, email_config as emailConfig, telegram_bot_token as telegramBotToken, telegram_chat_id as telegramChatId, wechat_send_key as wechatSendKey, qq_key as qqKey, webhook_url as webhookUrl FROM notification_settings LIMIT 1'
     ).all();
 
     const backupData: BackupData = {
@@ -211,12 +211,18 @@ async function handleRestore(env: any, config: WebDAVConfig, filename?: string):
     if (backupData.settings && Object.keys(backupData.settings).length > 0) {
       await env.DB.exec('DELETE FROM notification_settings');
       await env.DB.prepare(
-        'INSERT INTO notification_settings (warningDays, notificationEnabled, notificationInterval, notificationMethod) VALUES (?, ?, ?, ?)'
+        'INSERT INTO notification_settings (warning_days, notification_enabled, notification_interval, notification_method, email_config, telegram_bot_token, telegram_chat_id, wechat_send_key, qq_key, webhook_url) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)'
       ).bind(
         backupData.settings.warningDays || '15',
         backupData.settings.notificationEnabled || 'true',
         backupData.settings.notificationInterval || 'daily',
-        backupData.settings.notificationMethod || '[]'
+        backupData.settings.notificationMethod || '[]',
+        backupData.settings.emailConfig || null,
+        backupData.settings.telegramBotToken || null,
+        backupData.settings.telegramChatId || null,
+        backupData.settings.wechatSendKey || null,
+        backupData.settings.qqKey || null,
+        backupData.settings.webhookUrl || null
       ).run();
     }
 
