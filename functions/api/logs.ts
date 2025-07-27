@@ -160,31 +160,18 @@ export const onRequest = async (context: any) => {
     try {
       const url = new URL(request.url);
       const type = url.searchParams.get('type');
-      const days = parseInt(url.searchParams.get('days') || '30');
 
       if (type === 'operation') {
-        await env.DB.prepare(
-          'DELETE FROM operation_logs WHERE timestamp < datetime("now", "-" || ? || " days")'
-        ).bind(days).run();
+        await env.DB.prepare('DELETE FROM operation_logs').run();
       } else if (type === 'notification') {
-        await env.DB.prepare(
-          'DELETE FROM notification_logs WHERE timestamp < datetime("now", "-" || ? || " days")'
-        ).bind(days).run();
+        await env.DB.prepare('DELETE FROM notification_logs').run();
       } else if (type === 'access') {
-        await env.DB.prepare(
-          'DELETE FROM access_logs WHERE timestamp < datetime("now", "-" || ? || " days")'
-        ).bind(days).run();
+        await env.DB.prepare('DELETE FROM access_logs').run();
       } else {
         // 清理所有日志
-        await env.DB.prepare(
-          'DELETE FROM operation_logs WHERE timestamp < datetime("now", "-" || ? || " days")'
-        ).bind(days).run();
-        await env.DB.prepare(
-          'DELETE FROM notification_logs WHERE timestamp < datetime("now", "-" || ? || " days")'
-        ).bind(days).run();
-        await env.DB.prepare(
-          'DELETE FROM access_logs WHERE timestamp < datetime("now", "-" || ? || " days")'
-        ).bind(days).run();
+        await env.DB.prepare('DELETE FROM operation_logs').run();
+        await env.DB.prepare('DELETE FROM notification_logs').run();
+        await env.DB.prepare('DELETE FROM access_logs').run();
       }
 
       return new Response(JSON.stringify({ success: true, message: '日志清理成功' }), {
