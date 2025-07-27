@@ -14,6 +14,26 @@ interface BackupData {
   version: string;
 }
 
+// 将UTC时间转换为中国北京时区（UTC+8）
+function toBeijingTime(utcTime: string): string {
+  const date = new Date(utcTime);
+  const beijingTime = new Date(date.getTime() + 8 * 60 * 60 * 1000);
+  const year = beijingTime.getUTCFullYear();
+  const month = String(beijingTime.getUTCMonth() + 1).padStart(2, '0');
+  const day = String(beijingTime.getUTCDate()).padStart(2, '0');
+  const hours = String(beijingTime.getUTCHours()).padStart(2, '0');
+  const minutes = String(beijingTime.getUTCMinutes()).padStart(2, '0');
+  const seconds = String(beijingTime.getUTCSeconds()).padStart(2, '0');
+  return `${year}-${month}-${day} ${hours}:${minutes}:${seconds}`;
+}
+
+// 获取当前中国北京时区时间
+function getCurrentBeijingTime(): string {
+  const now = new Date();
+  const beijingTime = new Date(now.getTime() + 8 * 60 * 60 * 1000);
+  return beijingTime.toISOString();
+}
+
 export const onRequest = async (context: any) => {
   const { request, env } = context;
   const method = request.method.toUpperCase();
@@ -95,7 +115,7 @@ async function handleBackup(env: any, config: WebDAVConfig): Promise<Response> {
     const backupData: BackupData = {
       domains: domains || [],
       settings: settings?.[0] || {},
-      timestamp: new Date().toISOString(),
+      timestamp: getCurrentBeijingTime(),
       version: '1.0.0'
     };
 
@@ -149,7 +169,8 @@ async function handleBackup(env: any, config: WebDAVConfig): Promise<Response> {
       success: true,
       message: '备份成功',
       filename,
-      domainsCount: domains?.length || 0
+      domainsCount: domains?.length || 0,
+      timestamp: toBeijingTime(backupData.timestamp)
     });
   } catch (error: any) {
     console.error('WebDAV备份错误:', error);
@@ -230,7 +251,7 @@ async function handleRestore(env: any, config: WebDAVConfig, filename?: string):
       success: true,
       message: '恢复成功',
       domainsCount: backupData.domains.length,
-      timestamp: backupData.timestamp
+      timestamp: toBeijingTime(backupData.timestamp)
     });
   } catch (error: any) {
     console.error('WebDAV恢复错误:', error);
