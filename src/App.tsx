@@ -265,14 +265,50 @@ const App: React.FC = () => {
 
   function handleSelectAll(checked: boolean) {
     if (checked) {
-      setSelectedIndexes(domains.map((_: Domain, idx: number) => idx));
+      // 获取当前页面的域名索引
+      const filteredDomains = domains.filter((domain: Domain) =>
+        domain.domain.toLowerCase().includes(search.toLowerCase()) ||
+        domain.registrar.toLowerCase().includes(search.toLowerCase()) ||
+        domain.status.toLowerCase().includes(search.toLowerCase())
+      );
+      
+      // 对过滤后的域名进行排序
+      let sortedDomains = [...filteredDomains];
+      if (sortField) {
+        sortedDomains = sortedDomains.sort((a: Domain, b: Domain) => {
+          let valA: any = a[sortField as keyof Domain];
+          let valB: any = b[sortField as keyof Domain];
+          if (sortField === 'daysLeft') {
+            valA = getDaysLeft(a.expire_date);
+            valB = getDaysLeft(b.expire_date);
+          }
+          if (sortField === 'progress') {
+            valA = calculateProgress(a.register_date, a.expire_date);
+            valB = calculateProgress(b.register_date, b.expire_date);
+          }
+          if (valA < valB) return sortOrder === 'asc' ? -1 : 1;
+          if (valA > valB) return sortOrder === 'asc' ? 1 : -1;
+          return 0;
+        });
+      } else {
+        sortedDomains = sortedDomains.sort((a: Domain, b: Domain) => new Date(a.expire_date).getTime() - new Date(b.expire_date).getTime());
+      }
+      
+      // 获取当前页面的域名
+      const startIndex = (page - 1) * pageSize;
+      const endIndex = startIndex + pageSize;
+      const currentPageDomains = sortedDomains.slice(startIndex, endIndex);
+      
+      // 获取这些域名在原始数组中的索引
+      const currentPageIndexes = currentPageDomains.map(domain => domains.findIndex((d: Domain) => d.domain === domain.domain));
+      setSelectedIndexes(currentPageIndexes);
     } else {
       setSelectedIndexes([]);
     }
   }
 
   function handleSelectRow(index: number, checked: boolean) {
-    setSelectedIndexes(prev => checked ? [...prev, index] : prev.filter(i => i !== index));
+    setSelectedIndexes((prev: number[]) => checked ? [...prev, index] : prev.filter((i: number) => i !== index));
   }
 
   function handleEdit(index: number) {
@@ -383,7 +419,7 @@ const App: React.FC = () => {
   }
 
   function handleFormChange(field: string, value: string) {
-    setForm(prev => ({ ...prev, [field]: value }));
+    setForm((prev: Domain) => ({ ...prev, [field]: value }));
   }
 
   async function handlePasswordConfirm(password: string) {
