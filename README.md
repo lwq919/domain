@@ -39,10 +39,19 @@ CREATE INDEX IF NOT EXISTS idx_domains_status ON domains(status);
 CREATE INDEX IF NOT EXISTS idx_domains_expire_date ON domains(expire_date);
 
 CREATE TABLE IF NOT EXISTS notification_settings (
-  warning_days TEXT,
-  notification_enabled TEXT,
-  notification_interval TEXT,
-  notification_method TEXT
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  warning_days TEXT NOT NULL,
+  notification_enabled TEXT NOT NULL,
+  notification_interval TEXT NOT NULL,
+  notification_method TEXT NOT NULL,
+  email_config TEXT,
+  telegram_bot_token TEXT,
+  telegram_chat_id TEXT,
+  wechat_send_key TEXT,
+  qq_key TEXT,
+  webhook_url TEXT,
+  created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+  updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
 );
 ```
 
