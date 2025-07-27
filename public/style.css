@@ -23,20 +23,77 @@ body {
     margin-bottom: 40px;
     color: white;
     position: relative;
-    background: rgba(255,255,255,0.25);
-    border-radius: 16px;
-    backdrop-filter: blur(12px);
-    box-shadow: 0 4px 24px rgba(0,0,0,0.08);
-    padding: 24px 0 10px 0;
+    background: linear-gradient(135deg, rgba(255,255,255,0.3) 0%, rgba(255,255,255,0.15) 100%);
+    border-radius: 20px;
+    backdrop-filter: blur(15px);
+    -webkit-backdrop-filter: blur(15px);
+    box-shadow: 0 8px 32px rgba(0,0,0,0.12);
+    padding: 30px 20px 20px 20px;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    overflow: hidden;
+}
+
+.header::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 2px;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.6), transparent);
 }
 .header h1 {
-    font-size: 2.5rem;
-    margin-bottom: 10px;
-    text-shadow: 0 2px 4px rgba(0,0,0,0.3);
+    font-size: 2.8rem;
+    margin-bottom: 15px;
+    text-shadow: 0 3px 6px rgba(0,0,0,0.4);
+    font-weight: 700;
+    background: linear-gradient(135deg, #fff 0%, rgba(255, 255, 255, 0.9) 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    letter-spacing: 1px;
+    position: relative;
+    z-index: 1;
 }
 .header p {
-    font-size: 1.1rem;
-    opacity: 0.9;
+    font-size: 1.2rem;
+    opacity: 0.95;
+    margin: 0;
+    padding: 12px 30px;
+    background: linear-gradient(135deg, rgba(255, 255, 255, 0.15) 0%, rgba(255, 255, 255, 0.08) 100%);
+    border-radius: 25px;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    box-shadow: 0 2px 12px rgba(0, 0, 0, 0.1);
+    display: inline-block;
+    font-weight: 400;
+    letter-spacing: 0.5px;
+    text-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+    transition: all 0.3s ease;
+    position: relative;
+    overflow: hidden;
+}
+
+.header p::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+    transition: left 0.5s ease;
+}
+
+.header p:hover::before {
+    left: 100%;
+}
+
+.header p:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+    background: linear-gradient(135deg, rgba(255, 255, 255, 0.2) 0%, rgba(255, 255, 255, 0.12) 100%);
 }
 .settings-btn {
     position: absolute;
@@ -363,8 +420,16 @@ td {
 }
 .loading {
     text-align: center;
-    padding: 40px;
-    color: #666;
+    padding: 60px 40px;
+    color: rgba(255, 255, 255, 0.8);
+    font-size: 1.1rem;
+    font-weight: 500;
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 12px;
+    margin: 20px 0;
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.2);
 }
 .settings-section {
     margin-bottom: 30px;
@@ -843,17 +908,7 @@ td {
     text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
     letter-spacing: 0.5px;
     position: relative;
-    padding-left: 28px;
-}
-
-.toggle-text:before {
-    content: "🔔";
-    position: absolute;
-    left: 0;
-    top: 50%;
-    transform: translateY(-50%);
-    font-size: 1.1rem;
-    opacity: 0.9;
+    padding-left: 0;
 }
 
 /* 表单元素美化 */
@@ -1483,6 +1538,25 @@ td {
     .header h1 {
         font-size: 2rem;
     }
+    
+    .header {
+        padding: 20px 15px 15px 15px;
+        border-radius: 16px;
+        margin-bottom: 30px;
+    }
+    
+    .header h1 {
+        font-size: 2.2rem;
+        margin-bottom: 12px;
+        letter-spacing: 0.5px;
+    }
+    
+    .header p {
+        font-size: 0.95rem;
+        padding: 8px 16px;
+        border-radius: 18px;
+        letter-spacing: 0.3px;
+    }
     .settings-btn {
         width: 40px;
         height: 40px;
@@ -1509,6 +1583,12 @@ td {
     .modal-content {
         width: 95%;
         padding: 20px;
+    }
+    
+    .loading {
+        padding: 40px 20px;
+        font-size: 1rem;
+        margin: 10px 0;
     }
 }
 .sortable {
