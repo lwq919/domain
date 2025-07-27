@@ -32,7 +32,6 @@ import ExpireModal from './components/ExpireModal';
 import InfoModal from './components/InfoModal';
 import PasswordModal from './components/PasswordModal';
 import SettingsModal from './components/SettingsModal';
-import LogsModal from './components/LogsModal';
 
 const App: React.FC = () => {
   // 状态管理
@@ -63,7 +62,6 @@ const App: React.FC = () => {
   const [infoMessage, setInfoMessage] = useState('');
   const [infoTitle, setInfoTitle] = useState('');
   const [settingsModal, setSettingsModal] = useState(false);
-  const [logsModal, setLogsModal] = useState(false);
 
   // 通知相关状态
   const [warningDays, setWarningDays] = useState(() => localStorage.getItem('notificationWarningDays') || '15');
@@ -638,10 +636,7 @@ const App: React.FC = () => {
       <div className="header">
         <h1>域名面板</h1>
         <p>查看域名状态、注册商、注册日期、过期日期和使用进度</p>
-        <div className="header-buttons">
-          <button className="logs-btn" onClick={() => setLogsModal(true)}>📋</button>
-          <button className="settings-btn" onClick={() => setSettingsModal(true)}>⚙️</button>
-        </div>
+        <button className="settings-btn" onClick={() => setSettingsModal(true)}>⚙️</button>
       </div>
 
       <StatsGrid domains={domains} />
@@ -757,10 +752,7 @@ const App: React.FC = () => {
         onWebDAVRestore={handleWebDAVRestore}
       />
 
-      <LogsModal
-        isOpen={logsModal}
-        onClose={() => setLogsModal(false)}
-      />
+
     </div>
   );
 };
