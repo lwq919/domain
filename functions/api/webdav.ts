@@ -21,9 +21,9 @@ export const onRequest = async (context: any) => {
   if (method === 'POST') {
     try {
       const body = await request.json();
-      const { action, webdavConfig } = body;
+      const { action, webdavConfig, filename } = body;
 
-      console.log('WebDAV请求:', { action, hasWebDAVConfig: !!webdavConfig });
+      console.log('WebDAV请求:', { action, hasWebDAVConfig: !!webdavConfig, filename });
 
       if (!action) {
         return createErrorResponse('缺少操作类型', 400);
@@ -37,7 +37,7 @@ export const onRequest = async (context: any) => {
           url: webdavConfig.url,
           username: webdavConfig.username,
           password: webdavConfig.password,
-          path: webdavConfig.path || '/domain/domains-backup.json'
+          path: webdavConfig.path || '/domain/domains.json'
         };
         console.log('使用传入的WebDAV配置');
       } else {
@@ -60,7 +60,7 @@ export const onRequest = async (context: any) => {
           url: envUrl,
           username: envUser,
           password: envPass,
-          path: '/domain/domains-backup.json'
+          path: '/domain/domains.json'
         };
         console.log('使用环境变量WebDAV配置');
       }
@@ -68,7 +68,7 @@ export const onRequest = async (context: any) => {
       if (action === 'backup') {
         return await handleBackup(env, config);
       } else if (action === 'restore') {
-        return await handleRestore(env, config);
+        return await handleRestore(env, config, filename);
       } else {
         return createErrorResponse('不支持的操作', 400);
       }
@@ -100,7 +100,7 @@ async function handleBackup(env: any, config: WebDAVConfig): Promise<Response> {
     };
 
     const backupContent = JSON.stringify(backupData, null, 2);
-    const filename = `domains-backup-${new Date().toISOString().split('T')[0]}.json`;
+    const filename = 'domains.json';
 
     // 确保WebDAV URL格式正确
     let webdavUrl = config.url;
@@ -128,7 +128,7 @@ async function handleBackup(env: any, config: WebDAVConfig): Promise<Response> {
       console.warn('创建domain文件夹时出错:', error);
     }
 
-    // 上传到WebDAV的domain文件夹
+    // 上传到WebDAV的domain文件夹，固定文件名为domains.json
     const uploadUrl = new URL(`domain/${filename}`, webdavUrl).toString();
 
     const uploadResponse = await fetch(uploadUrl, {
@@ -157,7 +157,7 @@ async function handleBackup(env: any, config: WebDAVConfig): Promise<Response> {
   }
 }
 
-async function handleRestore(env: any, config: WebDAVConfig): Promise<Response> {
+async function handleRestore(env: any, config: WebDAVConfig, filename?: string): Promise<Response> {
   try {
     // 确保WebDAV URL格式正确
     let webdavUrl = config.url;
@@ -165,8 +165,11 @@ async function handleRestore(env: any, config: WebDAVConfig): Promise<Response> 
       webdavUrl += '/';
     }
 
+    // 使用固定的文件名domains.json
+    const backupFilename = filename || 'domains.json';
+
     // 从WebDAV的domain文件夹下载备份文件
-    const downloadUrl = new URL(config.path.replace(/^\//, ''), webdavUrl).toString();
+    const downloadUrl = new URL(`domain/${backupFilename}`, webdavUrl).toString();
     const auth = btoa(`${config.username}:${config.password}`);
 
     const downloadResponse = await fetch(downloadUrl, {
@@ -227,4 +230,4 @@ async function handleRestore(env: any, config: WebDAVConfig): Promise<Response> 
     console.error('WebDAV恢复错误:', error);
     return createErrorResponse(`恢复失败: ${error.message}`, 500);
   }
-} 
+}
