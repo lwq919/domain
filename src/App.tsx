@@ -52,9 +52,10 @@ const App: React.FC = () => {
   const [expiringDomains, setExpiringDomains] = useState<Domain[]>([]);
   const [deleteModal, setDeleteModal] = useState(false);
   const [domainToDelete, setDomainToDelete] = useState<Domain | null>(null);
+  const [domainToRenew, setDomainToRenew] = useState<Domain | null>(null);
   const [batchDeleteModal, setBatchDeleteModal] = useState(false);
   const [passwordModal, setPasswordModal] = useState(false);
-  const [passwordAction, setPasswordAction] = useState<'delete' | 'batchDelete' | 'edit' | null>(null);
+  const [passwordAction, setPasswordAction] = useState<'delete' | 'batchDelete' | 'edit' | 'renew' | null>(null);
   const [infoModal, setInfoModal] = useState(false);
   const [infoMessage, setInfoMessage] = useState('');
   const [infoTitle, setInfoTitle] = useState('');
@@ -288,6 +289,12 @@ const App: React.FC = () => {
   }
 
   function handleRenew(domain: Domain) {
+    setDomainToRenew(domain);
+    setPasswordAction('renew');
+    setPasswordModal(true);
+  }
+
+  function performRenew(domain: Domain) {
     if (domain.renewUrl && domain.renewUrl.trim() !== '') {
       window.open(domain.renewUrl, '_blank');
     } else {
@@ -399,6 +406,9 @@ const App: React.FC = () => {
         setBatchDeleteModal(true);
       } else if (passwordAction === 'edit') {
         setModalOpen(true);
+      } else if (passwordAction === 'renew' && domainToRenew) {
+        performRenew(domainToRenew);
+        setDomainToRenew(null);
       }
       
       setPasswordModal(false);
@@ -416,6 +426,7 @@ const App: React.FC = () => {
     setPasswordModal(false);
     setPasswordAction(null);
     setDomainToDelete(null);
+    setDomainToRenew(null);
     if (currentAction === 'edit') {
       setEditIndex(-1);
       setForm(defaultDomain);
@@ -634,11 +645,17 @@ const App: React.FC = () => {
             ? `确定要删除域名 "${domainToDelete.domain}" 吗？此操作需要管理员权限。`
             : passwordAction === 'edit'
             ? `确定要编辑域名 "${form.domain}" 吗？此操作需要管理员权限。`
+            : passwordAction === 'renew' && domainToRenew
+            ? `确定要续期域名 "${domainToRenew.domain}" 吗？此操作需要管理员权限。`
             : `确定要批量删除选中的 ${selectedIndexes.length} 个域名吗？此操作需要管理员权限。`
         }
         onConfirm={handlePasswordConfirm}
         onCancel={handlePasswordCancel}
-        confirmText={passwordAction === 'edit' ? '验证并编辑' : '验证并删除'}
+        confirmText={
+          passwordAction === 'edit' ? '验证并编辑' 
+          : passwordAction === 'renew' ? '验证并续期'
+          : '验证并删除'
+        }
         cancelText="取消"
       />
 
