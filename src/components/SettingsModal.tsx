@@ -490,23 +490,24 @@ const SettingsModal: React.FC<SettingsModalProps> = ({
               )}
             </div>
 
-            {/* 系统日志 */}
-            <div className="settings-section">
-              <h3>📋 系统日志</h3>
-              
-              <div className="form-group">
-                <label className="form-label">日志管理：</label>
-                <div className="logs-buttons">
-                  <button
-                    type="button"
-                    className="btn btn-logs"
-                    onClick={() => setLogsModal(true)}
-                  >
-                    📋 查看系统日志
-                  </button>
-                </div>
-                <small className="form-hint">查看操作日志和通知日志，支持筛选和清理功能</small>
+          </div>
+
+          {/* 系统日志 - 移到form外面 */}
+          <div className="settings-section" style={{ marginTop: '20px', paddingTop: '20px', borderTop: '1px solid rgba(255, 255, 255, 0.1)' }}>
+            <h3>📋 系统日志</h3>
+            
+            <div className="form-group">
+              <label className="form-label">日志管理：</label>
+              <div className="logs-buttons">
+                <button
+                  type="button"
+                  className="btn btn-logs"
+                  onClick={() => setLogsModal(true)}
+                >
+                  📋 查看系统日志
+                </button>
               </div>
+              <small className="form-hint">查看操作日志和通知日志，支持筛选和清理功能</small>
             </div>
           </div>
 
