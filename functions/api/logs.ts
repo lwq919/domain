@@ -1,12 +1,13 @@
 export interface LogEntry {
   id?: number;
-  type: 'operation' | 'notification';
+  type: 'operation' | 'notification' | 'access';
   action: string;
   details: string;
   status: 'success' | 'error' | 'warning';
   timestamp: string;
   user_agent?: string;
   ip_address?: string;
+  device_info?: string;
 }
 
 export interface NotificationLog {
@@ -19,9 +20,22 @@ export interface NotificationLog {
   error_details?: string;
 }
 
+import { initializeDatabase } from './common';
+
 export const onRequest = async (context: any) => {
   const { request, env } = context;
   const method = request.method.toUpperCase();
+
+  // 确保数据库已初始化
+  try {
+    await initializeDatabase(env);
+  } catch (error) {
+    console.error('数据库初始化失败:', error);
+    return new Response(JSON.stringify({ success: false, error: '数据库初始化失败' }), {
+      status: 500,
+      headers: { 'content-type': 'application/json' }
+    });
+  }
 
   if (method === 'GET') {
     try {
@@ -39,14 +53,20 @@ export const onRequest = async (context: any) => {
       } else if (type === 'notification') {
         query = 'SELECT * FROM notification_logs ORDER BY timestamp DESC LIMIT ? OFFSET ?';
         params = [limit, offset];
+      } else if (type === 'access') {
+        query = 'SELECT * FROM access_logs ORDER BY timestamp DESC LIMIT ? OFFSET ?';
+        params = [limit, offset];
       } else {
-        // 获取所有日志，先操作日志再通知日志
+        // 获取所有日志，先操作日志再通知日志再访问日志
         query = `
-          SELECT 'operation' as log_type, id, action, details, status, timestamp, user_agent, ip_address, NULL as domain, NULL as notification_method, NULL as message, NULL as error_details
+          SELECT 'operation' as log_type, id, action, details, status, timestamp, user_agent, ip_address, NULL as domain, NULL as notification_method, NULL as message, NULL as error_details, NULL as device_info
           FROM operation_logs
           UNION ALL
-          SELECT 'notification' as log_type, id, 'notification' as action, message as details, status, timestamp, NULL as user_agent, NULL as ip_address, domain, notification_method, message, error_details
+          SELECT 'notification' as log_type, id, 'notification' as action, message as details, status, timestamp, NULL as user_agent, NULL as ip_address, domain, notification_method, message, error_details, NULL as device_info
           FROM notification_logs
+          UNION ALL
+          SELECT 'access' as log_type, id, action, details, status, timestamp, user_agent, ip_address, NULL as domain, NULL as notification_method, NULL as message, NULL as error_details, device_info
+          FROM access_logs
           ORDER BY timestamp DESC
           LIMIT ? OFFSET ?
         `;
@@ -77,7 +97,7 @@ export const onRequest = async (context: any) => {
   if (method === 'POST') {
     try {
       const body = await request.json();
-      const { type, action, details, status, domain, notification_method, message, error_details } = body;
+      const { type, action, details, status, domain, notification_method, message, error_details, device_info } = body;
 
       if (type === 'operation') {
         // 记录操作日志
@@ -87,26 +107,41 @@ export const onRequest = async (context: any) => {
                          request.headers.get('x-real-ip') || '';
 
         await env.DB.prepare(
-          'INSERT INTO operation_logs (action, details, status, timestamp, user_agent, ip_address) VALUES (?, ?, ?, ?, ?, ?)'
+          'INSERT INTO operation_logs (action, details, status, user_agent, ip_address) VALUES (?, ?, ?, ?, ?)'
         ).bind(
           action,
           details,
           status,
-          new Date().toISOString(),
           userAgent,
           ipAddress
         ).run();
       } else if (type === 'notification') {
         // 记录通知日志
         await env.DB.prepare(
-          'INSERT INTO notification_logs (domain, notification_method, status, message, timestamp, error_details) VALUES (?, ?, ?, ?, ?, ?)'
+          'INSERT INTO notification_logs (domain, notification_method, status, message, error_details) VALUES (?, ?, ?, ?, ?)'
         ).bind(
           domain,
           notification_method,
           status,
           message,
-          new Date().toISOString(),
           error_details || null
+        ).run();
+      } else if (type === 'access') {
+        // 记录访问日志
+        const userAgent = request.headers.get('user-agent') || '';
+        const ipAddress = request.headers.get('cf-connecting-ip') || 
+                         request.headers.get('x-forwarded-for') || 
+                         request.headers.get('x-real-ip') || '';
+
+        await env.DB.prepare(
+          'INSERT INTO access_logs (action, details, status, user_agent, ip_address, device_info) VALUES (?, ?, ?, ?, ?, ?)'
+        ).bind(
+          action,
+          details,
+          status,
+          userAgent,
+          ipAddress,
+          device_info || null
         ).run();
       }
 
@@ -135,6 +170,10 @@ export const onRequest = async (context: any) => {
         await env.DB.prepare(
           'DELETE FROM notification_logs WHERE timestamp < datetime("now", "-" || ? || " days")'
         ).bind(days).run();
+      } else if (type === 'access') {
+        await env.DB.prepare(
+          'DELETE FROM access_logs WHERE timestamp < datetime("now", "-" || ? || " days")'
+        ).bind(days).run();
       } else {
         // 清理所有日志
         await env.DB.prepare(
@@ -142,6 +181,9 @@ export const onRequest = async (context: any) => {
         ).bind(days).run();
         await env.DB.prepare(
           'DELETE FROM notification_logs WHERE timestamp < datetime("now", "-" || ? || " days")'
+        ).bind(days).run();
+        await env.DB.prepare(
+          'DELETE FROM access_logs WHERE timestamp < datetime("now", "-" || ? || " days")'
         ).bind(days).run();
       }
 
