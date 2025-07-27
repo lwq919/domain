@@ -8,7 +8,8 @@ import {
   saveNotificationSettingsToServer,
   verifyAdminPassword,
   webdavBackup,
-  webdavRestore
+  webdavRestore,
+  logAccess
 } from './api';
 import { Domain, defaultDomain, SortOrder, ExportFormat, NotificationMethod } from './types';
 import { 
@@ -20,7 +21,8 @@ import {
   getTodayString, 
   isMobile,
   parseCSVLine,
-  normalizeField
+  normalizeField,
+  getDeviceInfo
 } from './utils';
 
 // 导入组件
@@ -103,6 +105,17 @@ const App: React.FC = () => {
     loadDomains();
     loadCarouselImages();
     loadNotificationSettings();
+    
+    // 记录访问日志
+    const deviceInfo = getDeviceInfo();
+    logAccess(
+      'access',
+      '用户访问域名管理面板',
+      'success',
+      deviceInfo
+    ).catch(error => {
+      console.error('记录访问日志失败:', error);
+    });
   }, []);
 
   // 每天开始时重置通知状态
