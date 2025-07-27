@@ -53,6 +53,30 @@ CREATE TABLE IF NOT EXISTS notification_settings (
   created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
   updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
 );
+
+CREATE TABLE IF NOT EXISTS operation_logs (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  action TEXT NOT NULL,
+  details TEXT NOT NULL,
+  status TEXT NOT NULL,
+  timestamp DATETIME DEFAULT CURRENT_TIMESTAMP,
+  user_agent TEXT,
+  ip_address TEXT
+);
+
+CREATE TABLE IF NOT EXISTS notification_logs (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  domain TEXT NOT NULL,
+  notification_method TEXT NOT NULL,
+  status TEXT NOT NULL,
+  message TEXT NOT NULL,
+  timestamp DATETIME DEFAULT CURRENT_TIMESTAMP,
+  error_details TEXT
+);
+
+CREATE INDEX IF NOT EXISTS idx_operation_logs_timestamp ON operation_logs(timestamp);
+CREATE INDEX IF NOT EXISTS idx_notification_logs_timestamp ON notification_logs(timestamp);
+CREATE INDEX IF NOT EXISTS idx_notification_logs_domain ON notification_logs(domain);
 ```
 
 ## 🔧 环境变量配置
