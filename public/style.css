@@ -629,9 +629,10 @@ td {
     left: 0;
     right: 0;
     bottom: 0;
-    background-color: #ccc;
+    background-color: rgba(255, 255, 255, 0.3);
     transition: 0.3s;
     border-radius: 26px;
+    border: 1px solid rgba(255, 255, 255, 0.2);
 }
 
 .toggle-slider:before {
@@ -641,18 +642,29 @@ td {
     width: 20px;
     left: 3px;
     bottom: 3px;
-    background-color: white;
+    background: linear-gradient(135deg, #ffffff, #f5f5f5);
     transition: 0.3s;
     border-radius: 50%;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+    border: 1px solid rgba(255, 255, 255, 0.8);
 }
 
 .toggle-input:checked + .toggle-slider {
-    background: rgba(255, 255, 255, 0.4);
+    background: linear-gradient(135deg, #4CAF50, #45a049);
+    border-color: #4CAF50;
+    box-shadow: 0 0 10px rgba(76, 175, 80, 0.3);
 }
 
 .toggle-input:checked + .toggle-slider:before {
     transform: translateX(24px);
+}
+
+.toggle-switch:hover .toggle-slider {
+    box-shadow: 0 0 15px rgba(255, 255, 255, 0.2);
+}
+
+.toggle-input:checked + .toggle-slider:hover {
+    box-shadow: 0 0 15px rgba(76, 175, 80, 0.4);
 }
 
 .toggle-text {
