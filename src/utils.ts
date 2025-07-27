@@ -107,8 +107,32 @@ export function copyToClipboard(text: string): Promise<void> {
   });
 }
 
+// 时区处理工具函数
+export function getBeijingTime(date: Date = new Date()): Date {
+  // 将UTC时间转换为北京时间 (UTC+8)
+  return new Date(date.getTime() + 8 * 60 * 60 * 1000);
+}
+
+export function formatBeijingTime(date: Date | string, options?: Intl.DateTimeFormatOptions): string {
+  const dateObj = typeof date === 'string' ? new Date(date) : date;
+  const beijingTime = getBeijingTime(dateObj);
+  
+  return beijingTime.toLocaleString('zh-CN', {
+    timeZone: 'Asia/Shanghai',
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit',
+    hour: '2-digit',
+    minute: '2-digit',
+    second: '2-digit',
+    hour12: false,
+    ...options
+  });
+}
+
 export function getTodayString(): string {
-  return new Date().toISOString().slice(0, 10);
+  // 获取北京时间的今天日期
+  return getBeijingTime().toISOString().slice(0, 10);
 }
 
 export function isMobile(): boolean {
@@ -144,7 +168,7 @@ export const exportDomainsToJSON = (domains: Domain[]): void => {
   const url = URL.createObjectURL(dataBlob);
   const link = document.createElement('a');
   link.href = url;
-  link.download = `domains_${new Date().toISOString().split('T')[0]}.json`;
+  link.download = `domains_${getTodayString()}.json`;
   document.body.appendChild(link);
   link.click();
   document.body.removeChild(link);
@@ -170,7 +194,7 @@ export const exportDomainsToCSV = (domains: Domain[]): void => {
   const url = URL.createObjectURL(dataBlob);
   const link = document.createElement('a');
   link.href = url;
-  link.download = `domains_${new Date().toISOString().split('T')[0]}.csv`;
+  link.download = `domains_${getTodayString()}.csv`;
   document.body.appendChild(link);
   link.click();
   document.body.removeChild(link);
@@ -187,7 +211,7 @@ export const exportDomainsToTXT = (domains: Domain[]): void => {
   const url = URL.createObjectURL(dataBlob);
   const link = document.createElement('a');
   link.href = url;
-  link.download = `domains_${new Date().toISOString().split('T')[0]}.txt`;
+  link.download = `domains_${getTodayString()}.txt`;
   document.body.appendChild(link);
   link.click();
   document.body.removeChild(link);
