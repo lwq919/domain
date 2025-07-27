@@ -113,4 +113,179 @@ export function getTodayString(): string {
 
 export function isMobile(): boolean {
   return window.innerWidth <= 768;
-} 
+}
+
+// 导出域名数据为JSON文件
+export const exportDomainsToJSON = (domains: Domain[]): void => {
+  const dataStr = JSON.stringify(domains, null, 2);
+  const dataBlob = new Blob([dataStr], { type: 'application/json' });
+  const url = URL.createObjectURL(dataBlob);
+  const link = document.createElement('a');
+  link.href = url;
+  link.download = `domains_${new Date().toISOString().split('T')[0]}.json`;
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
+  URL.revokeObjectURL(url);
+};
+
+// 导出域名数据为CSV文件
+export const exportDomainsToCSV = (domains: Domain[]): void => {
+  const headers = ['域名', '状态', '注册商', '注册日期', '到期日期', '续费链接'];
+  const csvContent = [
+    headers.join(','),
+    ...domains.map(domain => [
+      domain.domain,
+      domain.status,
+      domain.registrar,
+      domain.register_date,
+      domain.expire_date,
+      domain.renewUrl || ''
+    ].join(','))
+  ].join('\n');
+
+  const dataBlob = new Blob(['\ufeff' + csvContent], { type: 'text/csv;charset=utf-8;' });
+  const url = URL.createObjectURL(dataBlob);
+  const link = document.createElement('a');
+  link.href = url;
+  link.download = `domains_${new Date().toISOString().split('T')[0]}.csv`;
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
+  URL.revokeObjectURL(url);
+};
+
+// 导出域名数据为TXT文件
+export const exportDomainsToTXT = (domains: Domain[]): void => {
+  const txtContent = domains.map(domain => 
+    `域名: ${domain.domain}\n状态: ${domain.status}\n注册商: ${domain.registrar}\n注册日期: ${domain.register_date}\n到期日期: ${domain.expire_date}${domain.renewUrl ? `\n续费链接: ${domain.renewUrl}` : ''}\n`
+  ).join('\n');
+
+  const dataBlob = new Blob([txtContent], { type: 'text/plain;charset=utf-8' });
+  const url = URL.createObjectURL(dataBlob);
+  const link = document.createElement('a');
+  link.href = url;
+  link.download = `domains_${new Date().toISOString().split('T')[0]}.txt`;
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
+  URL.revokeObjectURL(url);
+};
+
+// 从文件导入域名数据
+export const importDomainsFromFile = (file: File): Promise<Domain[]> => {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    
+    reader.onload = (e) => {
+      try {
+        const content = e.target?.result as string;
+        let domains: Domain[] = [];
+
+        if (file.name.endsWith('.json')) {
+          // 导入JSON文件
+          domains = JSON.parse(content);
+        } else if (file.name.endsWith('.csv')) {
+          // 导入CSV文件
+          const lines = content.split('\n').filter(line => line.trim());
+          const headers = lines[0].split(',');
+          
+          domains = lines.slice(1).map(line => {
+            const values = line.split(',');
+            return {
+              domain: values[0] || '',
+              status: values[1] || 'active',
+              registrar: values[2] || '',
+              register_date: values[3] || '',
+              expire_date: values[4] || '',
+              renewUrl: values[5] || ''
+            };
+          });
+        } else if (file.name.endsWith('.txt')) {
+          // 导入TXT文件（简单格式）
+          const lines = content.split('\n').filter(line => line.trim());
+          let currentDomain: Partial<Domain> = {};
+          
+          for (const line of lines) {
+            if (line.startsWith('域名:')) {
+              if (currentDomain.domain) {
+                domains.push(currentDomain as Domain);
+              }
+              currentDomain = { domain: line.replace('域名:', '').trim() };
+            } else if (line.startsWith('状态:')) {
+              currentDomain.status = line.replace('状态:', '').trim();
+            } else if (line.startsWith('注册商:')) {
+              currentDomain.registrar = line.replace('注册商:', '').trim();
+            } else if (line.startsWith('注册日期:')) {
+              currentDomain.register_date = line.replace('注册日期:', '').trim();
+            } else if (line.startsWith('到期日期:')) {
+              currentDomain.expire_date = line.replace('到期日期:', '').trim();
+            } else if (line.startsWith('续费链接:')) {
+              currentDomain.renewUrl = line.replace('续费链接:', '').trim();
+            }
+          }
+          
+          if (currentDomain.domain) {
+            domains.push(currentDomain as Domain);
+          }
+        } else {
+          throw new Error('不支持的文件格式');
+        }
+
+        // 验证数据格式
+        if (!Array.isArray(domains)) {
+          throw new Error('数据格式错误');
+        }
+
+        // 验证每个域名的必要字段
+        domains = domains.filter(domain => 
+          domain.domain && 
+          domain.status && 
+          domain.registrar && 
+          domain.register_date && 
+          domain.expire_date
+        );
+
+        resolve(domains);
+      } catch (error) {
+        reject(new Error(`导入失败: ${error instanceof Error ? error.message : '未知错误'}`));
+      }
+    };
+
+    reader.onerror = () => {
+      reject(new Error('文件读取失败'));
+    };
+
+    reader.readAsText(file, 'utf-8');
+  });
+};
+
+// 验证域名数据格式
+export const validateDomainData = (domains: Domain[]): { valid: boolean; errors: string[] } => {
+  const errors: string[] = [];
+  
+  if (!Array.isArray(domains)) {
+    errors.push('数据必须是数组格式');
+    return { valid: false, errors };
+  }
+
+  domains.forEach((domain, index) => {
+    if (!domain.domain) {
+      errors.push(`第${index + 1}行: 域名不能为空`);
+    }
+    if (!domain.status) {
+      errors.push(`第${index + 1}行: 状态不能为空`);
+    }
+    if (!domain.registrar) {
+      errors.push(`第${index + 1}行: 注册商不能为空`);
+    }
+    if (!domain.register_date) {
+      errors.push(`第${index + 1}行: 注册日期不能为空`);
+    }
+    if (!domain.expire_date) {
+      errors.push(`第${index + 1}行: 到期日期不能为空`);
+    }
+  });
+
+  return { valid: errors.length === 0, errors };
+}; 
