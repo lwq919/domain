@@ -74,9 +74,21 @@ CREATE TABLE IF NOT EXISTS notification_logs (
   error_details TEXT
 );
 
+CREATE TABLE IF NOT EXISTS access_logs (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  action TEXT NOT NULL,
+  details TEXT NOT NULL,
+  status TEXT NOT NULL,
+  timestamp DATETIME DEFAULT CURRENT_TIMESTAMP,
+  user_agent TEXT,
+  ip_address TEXT,
+  device_info TEXT
+);
+
 CREATE INDEX IF NOT EXISTS idx_operation_logs_timestamp ON operation_logs(timestamp);
 CREATE INDEX IF NOT EXISTS idx_notification_logs_timestamp ON notification_logs(timestamp);
 CREATE INDEX IF NOT EXISTS idx_notification_logs_domain ON notification_logs(domain);
+CREATE INDEX IF NOT EXISTS idx_access_logs_timestamp ON access_logs(timestamp);
 ```
 
 ## 🔧 环境变量配置
