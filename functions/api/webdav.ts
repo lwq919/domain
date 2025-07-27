@@ -17,6 +17,7 @@ interface BackupData {
 // 将UTC时间转换为中国北京时区（UTC+8）
 function toBeijingTime(utcTime: string): string {
   const date = new Date(utcTime);
+  // 创建北京时区的时间（UTC+8）
   const beijingTime = new Date(date.getTime() + 8 * 60 * 60 * 1000);
   const year = beijingTime.getUTCFullYear();
   const month = String(beijingTime.getUTCMonth() + 1).padStart(2, '0');
@@ -30,8 +31,15 @@ function toBeijingTime(utcTime: string): string {
 // 获取当前中国北京时区时间
 function getCurrentBeijingTime(): string {
   const now = new Date();
+  // 创建北京时区的时间（UTC+8）
   const beijingTime = new Date(now.getTime() + 8 * 60 * 60 * 1000);
-  return beijingTime.toISOString();
+  const year = beijingTime.getUTCFullYear();
+  const month = String(beijingTime.getUTCMonth() + 1).padStart(2, '0');
+  const day = String(beijingTime.getUTCDate()).padStart(2, '0');
+  const hours = String(beijingTime.getUTCHours()).padStart(2, '0');
+  const minutes = String(beijingTime.getUTCMinutes()).padStart(2, '0');
+  const seconds = String(beijingTime.getUTCSeconds()).padStart(2, '0');
+  return `${year}-${month}-${day} ${hours}:${minutes}:${seconds}`;
 }
 
 export const onRequest = async (context: any) => {
@@ -115,7 +123,7 @@ async function handleBackup(env: any, config: WebDAVConfig): Promise<Response> {
     const backupData: BackupData = {
       domains: domains || [],
       settings: settings?.[0] || {},
-      timestamp: getCurrentBeijingTime(),
+      timestamp: new Date().toISOString(), // 保存UTC时间到备份文件
       version: '1.0.0'
     };
 
@@ -170,7 +178,7 @@ async function handleBackup(env: any, config: WebDAVConfig): Promise<Response> {
       message: '备份成功',
       filename,
       domainsCount: domains?.length || 0,
-      timestamp: toBeijingTime(backupData.timestamp)
+      timestamp: getCurrentBeijingTime()
     });
   } catch (error: any) {
     console.error('WebDAV备份错误:', error);
