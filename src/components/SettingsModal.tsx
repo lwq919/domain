@@ -505,7 +505,7 @@ const SettingsModal: React.FC<SettingsModalProps> = ({
                     {webdavLoading ? '🔄 恢复中...' : '📥 从WebDAV恢复'}
                   </button>
                 </div>
-                <small className="form-hint">使用Cloudflare Pages环境变量中的WebDAV配置进行备份和恢复</small>
+                <small className="form-hint">使用Cloudflare Pages环境变量中的WebDAV配置进行备份和恢复。备份文件将存储到WebDAV服务器的domain文件夹中。</small>
               </div>
 
               {/* WebDAV操作结果提示 */}
