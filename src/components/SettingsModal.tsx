@@ -71,34 +71,43 @@ const SettingsModal: React.FC<SettingsModalProps> = ({
   if (!isOpen) return null;
 
   return (
-    <div className="modal-overlay" onClick={onClose}>
-      <div className="modal-content" onClick={e => e.stopPropagation()}>
-        <div className="modal-header">
+    <div className="modal-overlay settings-modal-overlay" onClick={onClose}>
+      <div className="modal-content settings-modal-content" onClick={e => e.stopPropagation()}>
+        <div className="modal-header settings-modal-header">
           <h2>⚙️ 设置</h2>
-          <button className="modal-close" onClick={onClose}>×</button>
+          <button className="modal-close settings-modal-close" onClick={onClose}>
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path d="M18 6L6 18M6 6L18 18" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+            </svg>
+          </button>
         </div>
         
         <form onSubmit={handleSubmit}>
-          <div className="modal-body">
+          <div className="modal-body settings-modal-body">
             {/* 通知设置 */}
             <div className="settings-section">
               <h3>🔔 通知设置</h3>
               
-              <div className="form-group">
-                <label>
-                  <input
-                    type="checkbox"
-                    checked={form.notificationEnabled === 'true'}
-                    onChange={e => setForm(prev => ({ ...prev, notificationEnabled: e.target.checked ? 'true' : 'false' }))}
-                  />
-                  启用到期提醒
+              <div className="form-group toggle-group">
+                <label className="toggle-label">
+                  <div className="toggle-switch">
+                    <input
+                      type="checkbox"
+                      className="toggle-input"
+                      checked={form.notificationEnabled === 'true'}
+                      onChange={e => setForm(prev => ({ ...prev, notificationEnabled: e.target.checked ? 'true' : 'false' }))}
+                    />
+                    <span className="toggle-slider"></span>
+                  </div>
+                  <span className="toggle-text">启用到期提醒</span>
                 </label>
               </div>
 
               <div className="form-group">
-                <label>提前提醒天数：</label>
+                <label className="form-label">提前提醒天数：</label>
                 <input
                   type="number"
+                  className="form-input"
                   min="1"
                   max="365"
                   value={form.warningDays}
@@ -108,8 +117,9 @@ const SettingsModal: React.FC<SettingsModalProps> = ({
               </div>
 
               <div className="form-group">
-                <label>提醒频率：</label>
+                <label className="form-label">提醒频率：</label>
                 <select
+                  className="form-select"
                   value={form.notificationInterval}
                   onChange={e => setForm(prev => ({ ...prev, notificationInterval: e.target.value }))}
                   disabled={form.notificationEnabled !== 'true'}
@@ -121,7 +131,7 @@ const SettingsModal: React.FC<SettingsModalProps> = ({
               </div>
 
               <div className="form-group">
-                <label>通知方式：</label>
+                <label className="form-label">通知方式：</label>
                 <div className="checkbox-group">
                   <label>
                     <input
@@ -130,7 +140,7 @@ const SettingsModal: React.FC<SettingsModalProps> = ({
                       onChange={e => handleNotificationMethodChange('email', e.target.checked)}
                       disabled={form.notificationEnabled !== 'true'}
                     />
-                    邮件
+                    📧 邮件
                   </label>
                   <label>
                     <input
@@ -139,7 +149,7 @@ const SettingsModal: React.FC<SettingsModalProps> = ({
                       onChange={e => handleNotificationMethodChange('webhook', e.target.checked)}
                       disabled={form.notificationEnabled !== 'true'}
                     />
-                    Webhook
+                    🔗 Webhook
                   </label>
                 </div>
               </div>
@@ -150,20 +160,22 @@ const SettingsModal: React.FC<SettingsModalProps> = ({
               <h3>🎨 背景设置</h3>
               
               <div className="form-group">
-                <label>自定义背景图片URL：</label>
+                <label className="form-label">自定义背景图片URL：</label>
                 <input
                   type="url"
+                  className="form-input"
                   placeholder="https://example.com/image.jpg"
                   value={form.bgImageUrl}
                   onChange={e => setForm(prev => ({ ...prev, bgImageUrl: e.target.value }))}
                 />
-                <small>留空则使用轮播背景</small>
+                <small className="form-hint">留空则使用轮播背景</small>
               </div>
 
               <div className="form-group">
-                <label>轮播间隔（秒）：</label>
+                <label className="form-label">轮播间隔（秒）：</label>
                 <input
                   type="number"
+                  className="form-input"
                   min="5"
                   max="300"
                   value={form.carouselInterval}
@@ -173,11 +185,19 @@ const SettingsModal: React.FC<SettingsModalProps> = ({
             </div>
           </div>
 
-          <div className="modal-footer">
-            <button type="button" className="btn-secondary" onClick={onClose}>
+          <div className="modal-footer settings-modal-footer">
+            <button type="button" className="btn btn-cancel" onClick={onClose}>
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M18 6L6 18M6 6L18 18" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+              </svg>
               取消
             </button>
-            <button type="submit" className="btn-primary">
+            <button type="submit" className="btn btn-save">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                <polyline points="17,21 17,13 7,13 7,21" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                <polyline points="7,3 7,8 15,8" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+              </svg>
               保存设置
             </button>
           </div>
