@@ -596,7 +596,7 @@ const SettingsModal: React.FC<SettingsModalProps> = ({
           onConfirm={handleAlertClose}
           onCancel={handleAlertClose}
           confirmText="确定"
-          type="alert"
+          type={alertType === 'success' ? 'success' : 'alert'}
         />
       </div>
     </div>
