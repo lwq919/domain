@@ -1788,7 +1788,7 @@ td {
 /* 确认模态框样式 */
 .confirm-modal-overlay {
   background: rgba(0, 0, 0, 0.6);
-  z-index: 99999;
+  z-index: 999999;
   position: fixed;
   top: 0;
   left: 0;
@@ -1808,7 +1808,7 @@ td {
   border-radius: 20px;
   max-width: 500px;
   width: 100%;
-  z-index: 100000;
+  z-index: 1000000;
   position: relative;
 }
 
