@@ -1,4 +1,4 @@
-import { Domain, DomainsResponse, NotificationSettingsResponse, NotificationSettingsRequest } from './types';
+import { Domain, DomainsResponse, NotificationSettingsResponse, NotificationSettingsRequest, WebDAVConfig, WebDAVResponse } from './types';
 
 async function fetchWithRetry(url: string, options?: RequestInit, retries = 3): Promise<Response> {
   for (let i = 0; i < retries; i++) {
@@ -102,4 +102,42 @@ export async function verifyAdminPassword(password: string): Promise<boolean> {
   });
   const data = await res.json();
   return data.success === true;
+}
+
+export async function webdavBackup(webdavConfig: WebDAVConfig): Promise<WebDAVResponse> {
+  const res = await fetchWithRetry('/api/webdav', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ action: 'backup', webdavConfig })
+  });
+  
+  if (!res.ok) {
+    throw new Error(`HTTP ${res.status}: ${res.statusText}`);
+  }
+  
+  const data = await res.json();
+  if (!data.success) {
+    throw new Error(data.error || '备份失败');
+  }
+  
+  return data;
+}
+
+export async function webdavRestore(webdavConfig: WebDAVConfig): Promise<WebDAVResponse> {
+  const res = await fetchWithRetry('/api/webdav', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ action: 'restore', webdavConfig })
+  });
+  
+  if (!res.ok) {
+    throw new Error(`HTTP ${res.status}: ${res.statusText}`);
+  }
+  
+  const data = await res.json();
+  if (!data.success) {
+    throw new Error(data.error || '恢复失败');
+  }
+  
+  return data;
 } 
