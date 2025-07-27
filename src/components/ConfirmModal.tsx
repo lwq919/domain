@@ -8,7 +8,7 @@ interface ConfirmModalProps {
   onCancel: () => void;
   confirmText?: string;
   cancelText?: string;
-  type?: 'confirm' | 'alert' | 'warning';
+  type?: 'confirm' | 'alert' | 'warning' | 'success';
 }
 
 const ConfirmModal: React.FC<ConfirmModalProps> = ({
@@ -29,6 +29,8 @@ const ConfirmModal: React.FC<ConfirmModalProps> = ({
         return '⚠️';
       case 'alert':
         return '❌';
+      case 'success':
+        return '✅';
       default:
         return '❓';
     }
@@ -40,6 +42,8 @@ const ConfirmModal: React.FC<ConfirmModalProps> = ({
         return 'btn btn-warning';
       case 'alert':
         return 'btn btn-danger';
+      case 'success':
+        return 'btn btn-primary';
       default:
         return 'btn btn-primary';
     }
