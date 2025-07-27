@@ -991,6 +991,61 @@ table td.loading {
     box-shadow: 0 4px 15px rgba(86, 171, 47, 0.3);
 }
 
+/* 域名模态框按钮样式 - 与设置菜单按钮保持一致 */
+.btn-cancel-domain {
+    background: linear-gradient(135deg, #ff6b6b 0%, #ee5a52 100%);
+    color: #fff;
+    box-shadow: 0 4px 15px rgba(255, 107, 107, 0.3);
+    border: none;
+    padding: 12px 24px;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 14px;
+    font-weight: 500;
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.btn-cancel-domain:hover {
+    background: linear-gradient(135deg, #ff5252 0%, #d32f2f 100%);
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(255, 107, 107, 0.4);
+}
+
+.btn-cancel-domain:active {
+    transform: translateY(0);
+    box-shadow: 0 4px 15px rgba(255, 107, 107, 0.3);
+}
+
+.btn-save-domain {
+    background: linear-gradient(135deg, #56ab2f 0%, #a8e6cf 100%);
+    color: #fff;
+    box-shadow: 0 4px 15px rgba(86, 171, 47, 0.3);
+    border: none;
+    padding: 12px 24px;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 14px;
+    font-weight: 500;
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.btn-save-domain:hover {
+    background: linear-gradient(135deg, #4a9a26 0%, #97d4b8 100%);
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(86, 171, 47, 0.4);
+}
+
+.btn-save-domain:active {
+    transform: translateY(0);
+    box-shadow: 0 4px 15px rgba(86, 171, 47, 0.3);
+}
+
 /* 按钮禁用状态 */
 .settings-modal-footer .btn:disabled {
     opacity: 0.6;
