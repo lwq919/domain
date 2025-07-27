@@ -994,6 +994,12 @@ td {
 /* 日志模态框样式 */
 .logs-modal-overlay {
   background: rgba(0, 0, 0, 0.4);
+  z-index: 99999;
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
 }
 
 .logs-modal-content {
@@ -1006,6 +1012,8 @@ td {
   border: 1px solid rgba(255, 255, 255, 0.3);
   border-radius: 20px;
   overflow: hidden;
+  z-index: 100000;
+  position: relative;
 }
 
 .logs-modal-header {
@@ -1234,6 +1242,8 @@ td {
   display: flex;
   gap: 12px;
   margin-bottom: 12px;
+  position: relative;
+  z-index: 10;
 }
 
 .btn-logs {
@@ -1248,6 +1258,9 @@ td {
   box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
   position: relative;
   overflow: hidden;
+  z-index: 10;
+  pointer-events: auto;
+  user-select: none;
 }
 
 .btn-logs::before {
