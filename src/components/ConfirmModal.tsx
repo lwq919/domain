@@ -1,70 +1,75 @@
 import React from 'react';
-import { Domain, STATUS_LABELS } from '../types';
-import { isMobile } from '../utils';
 
 interface ConfirmModalProps {
   isOpen: boolean;
   title: string;
   message: string;
-  confirmText?: string;
-  cancelText?: string;
   onConfirm: () => void;
   onCancel: () => void;
-  domains?: Domain[];
-  showDomainList?: boolean;
+  confirmText?: string;
+  cancelText?: string;
+  type?: 'confirm' | 'alert' | 'warning';
 }
 
 const ConfirmModal: React.FC<ConfirmModalProps> = ({
   isOpen,
   title,
   message,
-  confirmText = '确认',
-  cancelText = '取消',
   onConfirm,
   onCancel,
-  domains = [],
-  showDomainList = false
+  confirmText = '确定',
+  cancelText = '取消',
+  type = 'confirm'
 }) => {
   if (!isOpen) return null;
 
+  const getIcon = () => {
+    switch (type) {
+      case 'warning':
+        return '⚠️';
+      case 'alert':
+        return '❌';
+      default:
+        return '❓';
+    }
+  };
+
+  const getConfirmButtonClass = () => {
+    switch (type) {
+      case 'warning':
+        return 'btn btn-warning';
+      case 'alert':
+        return 'btn btn-danger';
+      default:
+        return 'btn btn-primary';
+    }
+  };
+
   return (
-    <div className="modal" style={{ display: 'block', zIndex: 9999 }} onClick={e => { if (e.target === e.currentTarget) onCancel(); }}>
-      <div className="modal-content" style={isMobile() ? { width: '98%', padding: 10 } : {}}>
-        <div className="modal-header">
-          <h3>{title}</h3>
+    <div className="modal-overlay confirm-modal-overlay" onClick={onCancel}>
+      <div className="modal-content confirm-modal-content" onClick={(e) => e.stopPropagation()}>
+        <div className="modal-header confirm-modal-header">
+          <h3>{getIcon()} {title}</h3>
+          <button className="modal-close confirm-modal-close" onClick={onCancel}>
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path d="M18 6L6 18M6 6L18 18" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+            </svg>
+          </button>
         </div>
-        <div className="modal-body">
+        
+        <div className="modal-body confirm-modal-body">
           <p>{message}</p>
-          {showDomainList && domains.length > 0 && (
-            <div style={{ 
-              marginBottom: 10, 
-              padding: 15, 
-              background: 'rgba(255, 255, 255, 0.1)', 
-              borderRadius: 12,
-              backdropFilter: 'blur(10px)',
-              WebkitBackdropFilter: 'blur(10px)',
-              border: '1px solid rgba(255, 255, 255, 0.2)',
-              boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)',
-              color: '#fff',
-              maxHeight: 200,
-              overflowY: 'auto'
-            }}>
-              {domains.map((domain, index) => (
-                <div key={domain.domain} style={{ 
-                  padding: '8px 0', 
-                  borderBottom: index < domains.length - 1 ? '1px solid rgba(255, 255, 255, 0.1)' : 'none' 
-                }}>
-                  <p style={{ margin: '2px 0', fontSize: '14px' }}>
-                    <strong>{domain.domain}</strong> - {domain.registrar}
-                  </p>
-                </div>
-              ))}
-            </div>
-          )}
         </div>
-        <div className="modal-buttons">
-          <button className="btn btn-danger" onClick={onConfirm}>{confirmText}</button>
-          <button className="btn btn-secondary" onClick={onCancel}>{cancelText}</button>
+        
+        <div className="modal-footer confirm-modal-footer">
+          {type !== 'alert' && (
+            <button className="btn btn-secondary" onClick={onCancel}>
+              {cancelText}
+            </button>
+          )}
+          <button className={getConfirmButtonClass()} onClick={onConfirm}>
+            {confirmText}
+          </button>
         </div>
       </div>
     </div>
