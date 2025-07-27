@@ -445,8 +445,8 @@ td {
 
 /* 设置模态框样式 */
 .settings-modal-body .checkbox-group {
-    display: flex;
-    flex-wrap: wrap;
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
     gap: 12px;
     margin-top: 8px;
     margin-bottom: 16px;
@@ -472,17 +472,22 @@ td {
 .settings-modal-body .checkbox-group label {
     display: flex;
     align-items: center;
-    gap: 8px;
+    justify-content: flex-start;
+    gap: 10px;
     color: #fff;
     cursor: pointer;
-    padding: 8px 12px;
+    padding: 14px 16px;
     background: rgba(255, 255, 255, 0.3);
-    border-radius: 8px;
+    border-radius: 12px;
     transition: all 0.3s ease;
     border: 2px solid transparent;
     backdrop-filter: blur(10px);
     -webkit-backdrop-filter: blur(10px);
     text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+    min-height: 52px;
+    font-weight: 500;
+    font-size: 14px;
+    white-space: nowrap;
 }
 
 .settings-modal-body .checkbox-group label:hover {
@@ -491,9 +496,16 @@ td {
 }
 
 .settings-modal-body .checkbox-group input[type="checkbox"] {
-    width: 16px;
-    height: 16px;
+    width: 18px;
+    height: 18px;
     accent-color: #667eea;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.settings-modal-body .checkbox-group input[type="checkbox"]:checked {
+    transform: scale(1.1);
 }
 
 .modal-footer {
@@ -858,6 +870,13 @@ td {
 }
 
 /* 响应式设计 */
+@media (min-width: 1200px) {
+    .settings-modal-body .checkbox-group {
+        grid-template-columns: repeat(3, 1fr);
+        gap: 16px;
+    }
+}
+
 @media (max-width: 768px) {
     .settings-modal-content {
         width: 95%;
@@ -877,7 +896,14 @@ td {
     }
     
     .settings-modal-body .checkbox-group {
-        flex-direction: column;
+        grid-template-columns: 1fr;
+        gap: 10px;
+    }
+    
+    .settings-modal-body .checkbox-group label {
+        padding: 10px 14px;
+        min-height: 44px;
+        font-size: 13px;
     }
     
     .settings-modal-footer .btn {
