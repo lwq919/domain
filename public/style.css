@@ -1393,10 +1393,9 @@ table td.loading {
 }
 
 .btn-page:disabled {
-  opacity: 0.6;
+  opacity: 0.4;
   cursor: not-allowed;
   transform: none;
-  background: linear-gradient(135deg, #ccc 0%, #999 100%);
   box-shadow: none;
 }
 
@@ -1770,10 +1769,9 @@ table td.loading {
 }
 
 .btn-pagination:disabled {
-    opacity: 0.6;
+    opacity: 0.4;
     cursor: not-allowed;
     transform: none;
-    background: linear-gradient(135deg, #ccc 0%, #999 100%);
     box-shadow: none;
 }
 
