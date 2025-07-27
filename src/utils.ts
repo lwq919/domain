@@ -115,6 +115,28 @@ export function isMobile(): boolean {
   return window.innerWidth <= 768;
 }
 
+export function getDeviceInfo(): string {
+  const userAgent = navigator.userAgent;
+  const platform = navigator.platform;
+  const language = navigator.language;
+  const screenWidth = window.screen.width;
+  const screenHeight = window.screen.height;
+  const isMobileDevice = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(userAgent);
+  
+  let deviceType = '桌面设备';
+  if (isMobileDevice) {
+    if (/iPhone|iPad|iPod/i.test(userAgent)) {
+      deviceType = 'iOS设备';
+    } else if (/Android/i.test(userAgent)) {
+      deviceType = 'Android设备';
+    } else {
+      deviceType = '移动设备';
+    }
+  }
+  
+  return `${deviceType} | ${platform} | ${language} | ${screenWidth}x${screenHeight}`;
+}
+
 // 导出域名数据为JSON文件
 export const exportDomainsToJSON = (domains: Domain[]): void => {
   const dataStr = JSON.stringify(domains, null, 2);
