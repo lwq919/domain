@@ -214,7 +214,7 @@ const App: React.FC = () => {
         setWarningDays(data.settings.warningDays);
         setNotificationEnabled(data.settings.notificationEnabled);
         setNotificationInterval(data.settings.notificationInterval);
-        let methods = data.settings.notificationMethod;
+        let methods = data.settings.notificationMethods;
         if (Array.isArray(methods)) setNotificationMethods(methods);
         else if (typeof methods === 'string') {
           try { setNotificationMethods(JSON.parse(methods)); } catch { setNotificationMethods([]); }
@@ -540,7 +540,7 @@ const App: React.FC = () => {
         warningDays: settings.warningDays,
         notificationEnabled: settings.notificationEnabled,
         notificationInterval: settings.notificationInterval,
-        notificationMethod: JSON.stringify(settings.notificationMethods)
+        notificationMethods: settings.notificationMethods
       });
 
       // 更新本地状态
