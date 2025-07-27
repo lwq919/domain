@@ -50,6 +50,22 @@ export interface NotificationSettingsRequest {
   webhookUrl?: string;
 }
 
+export interface WebDAVConfig {
+  url?: string;
+  username?: string;
+  password?: string;
+  path?: string;
+}
+
+export interface WebDAVResponse {
+  success: boolean;
+  message?: string;
+  error?: string;
+  filename?: string;
+  domainsCount?: number;
+  timestamp?: string;
+}
+
 export type SortOrder = 'asc' | 'desc';
 export type FilterStatus = 'all' | 'active' | 'expired' | 'pending';
 export type ExportFormat = 'csv' | 'json' | 'txt';
