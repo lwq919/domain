@@ -370,6 +370,15 @@ td {
     justify-content: center;
     min-height: 200px;
 }
+
+/* 确保表格中的loading单元格完全居中 */
+td.loading {
+    text-align: center !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    width: 100% !important;
+}
 .settings-section {
     margin-bottom: 30px;
     padding: 20px;
