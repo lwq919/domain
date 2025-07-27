@@ -140,4 +140,96 @@ export async function webdavRestore(webdavConfig: WebDAVConfig): Promise<WebDAVR
   }
   
   return data;
+}
+
+export interface LogEntry {
+  id?: number;
+  log_type?: string;
+  type?: string;
+  action: string;
+  details: string;
+  status: 'success' | 'error' | 'warning' | 'sent' | 'failed';
+  timestamp: string;
+  user_agent?: string;
+  ip_address?: string;
+  domain?: string;
+  notification_method?: string;
+  message?: string;
+  error_details?: string;
+}
+
+export interface LogsResponse {
+  success: boolean;
+  logs: LogEntry[];
+  pagination: {
+    limit: number;
+    offset: number;
+    total: number;
+  };
+  error?: string;
+}
+
+export async function getLogs(type: string = 'all', limit: number = 50, offset: number = 0): Promise<LogsResponse> {
+  const params = new URLSearchParams({
+    type,
+    limit: limit.toString(),
+    offset: offset.toString()
+  });
+  
+  const res = await fetch(`/api/logs?${params}`);
+  if (!res.ok) {
+    throw new Error(`HTTP ${res.status}: ${res.statusText}`);
+  }
+  
+  return res.json();
+}
+
+export async function clearLogs(type: string = 'all'): Promise<{ success: boolean; message?: string; error?: string }> {
+  const params = new URLSearchParams({ type });
+  
+  const res = await fetch(`/api/logs?${params}`, {
+    method: 'DELETE'
+  });
+  
+  if (!res.ok) {
+    throw new Error(`HTTP ${res.status}: ${res.statusText}`);
+  }
+  
+  return res.json();
+}
+
+export async function logOperation(action: string, details: string, status: 'success' | 'error' | 'warning' = 'success'): Promise<void> {
+  try {
+    await fetch('/api/logs', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        type: 'operation',
+        action,
+        details,
+        status
+      })
+    });
+  } catch (error) {
+    console.error('记录操作日志失败:', error);
+  }
+}
+
+export async function logNotification(domain: string, notification_method: string, status: 'sent' | 'failed', message: string, error_details?: string): Promise<void> {
+  try {
+    await fetch('/api/logs', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        type: 'notification',
+        domain,
+        notification_method,
+        status,
+        message,
+        error_details
+      })
+    });
+  } catch (error) {
+    console.error('记录通知日志失败:', error);
+  }
 } 
