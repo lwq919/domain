@@ -591,7 +591,7 @@ const App: React.FC = () => {
   async function handleWebDAVBackup() {
     try {
       const result = await webdavBackup({});
-      showInfoModal('✅ WebDAV备份成功', `成功备份 ${result.domainsCount || 0} 个域名到 ${result.filename || 'WebDAV服务器'}`);
+      showInfoModal('✅ WebDAV备份成功', `成功备份 ${result.domainsCount || 0} 个域名到 ${result.filename || 'WebDAV服务器'}，备份时间: ${result.timestamp || '未知'}`);
       setOpMsg('WebDAV备份成功');
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : '备份失败';
