@@ -54,7 +54,7 @@ const App: React.FC = () => {
   const [domainToDelete, setDomainToDelete] = useState<Domain | null>(null);
   const [batchDeleteModal, setBatchDeleteModal] = useState(false);
   const [passwordModal, setPasswordModal] = useState(false);
-  const [passwordAction, setPasswordAction] = useState<'delete' | 'batchDelete' | null>(null);
+  const [passwordAction, setPasswordAction] = useState<'delete' | 'batchDelete' | 'edit' | null>(null);
   const [infoModal, setInfoModal] = useState(false);
   const [infoMessage, setInfoMessage] = useState('');
   const [infoTitle, setInfoTitle] = useState('');
@@ -277,7 +277,8 @@ const App: React.FC = () => {
   function handleEdit(index: number) {
     setEditIndex(index);
     setForm(domains[index]);
-    setModalOpen(true);
+    setPasswordAction('edit');
+    setPasswordModal(true);
   }
 
   function handleDelete(index: number) {
@@ -387,7 +388,7 @@ const App: React.FC = () => {
         return;
       }
       
-      // 密码验证成功，执行相应的删除操作
+      // 密码验证成功，执行相应的操作
       if (passwordAction === 'delete' && domainToDelete) {
         await deleteDomain(domainToDelete.domain);
         await loadDomains();
@@ -396,6 +397,8 @@ const App: React.FC = () => {
         setDomainToDelete(null);
       } else if (passwordAction === 'batchDelete') {
         setBatchDeleteModal(true);
+      } else if (passwordAction === 'edit') {
+        setModalOpen(true);
       }
       
       setPasswordModal(false);
@@ -409,9 +412,14 @@ const App: React.FC = () => {
   }
 
   function handlePasswordCancel() {
+    const currentAction = passwordAction;
     setPasswordModal(false);
     setPasswordAction(null);
     setDomainToDelete(null);
+    if (currentAction === 'edit') {
+      setEditIndex(-1);
+      setForm(defaultDomain);
+    }
   }
 
   async function confirmDelete() {
@@ -621,13 +629,16 @@ const App: React.FC = () => {
       <PasswordModal
         isOpen={passwordModal}
         title="🔐 管理员验证"
-        message={passwordAction === 'delete' && domainToDelete 
-          ? `确定要删除域名 "${domainToDelete.domain}" 吗？此操作需要管理员权限。`
-          : `确定要批量删除选中的 ${selectedIndexes.length} 个域名吗？此操作需要管理员权限。`
+        message={
+          passwordAction === 'delete' && domainToDelete 
+            ? `确定要删除域名 "${domainToDelete.domain}" 吗？此操作需要管理员权限。`
+            : passwordAction === 'edit'
+            ? `确定要编辑域名 "${form.domain}" 吗？此操作需要管理员权限。`
+            : `确定要批量删除选中的 ${selectedIndexes.length} 个域名吗？此操作需要管理员权限。`
         }
         onConfirm={handlePasswordConfirm}
         onCancel={handlePasswordCancel}
-        confirmText="验证并删除"
+        confirmText={passwordAction === 'edit' ? '验证并编辑' : '验证并删除'}
         cancelText="取消"
       />
 
