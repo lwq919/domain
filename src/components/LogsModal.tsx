@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { getLogs, clearLogs } from '../api';
+import { formatBeijingTime } from '../utils';
 import ConfirmModal from './ConfirmModal';
 
 interface LogEntry {
@@ -125,7 +126,7 @@ const LogsModal: React.FC<LogsModalProps> = ({ isOpen, onClose }) => {
   };
 
   const formatTimestamp = (timestamp: string) => {
-    return new Date(timestamp).toLocaleString('zh-CN');
+    return formatBeijingTime(timestamp);
   };
 
   const getActionIcon = (action: string) => {
