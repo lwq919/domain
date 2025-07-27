@@ -7,7 +7,9 @@ import {
   importDomainsFromFile, 
   validateDomainData 
 } from '../utils';
+import { verifyAdminPassword } from '../api';
 import LogsModal from './LogsModal';
+import PasswordModal from './PasswordModal';
 
 interface SettingsModalProps {
   isOpen: boolean;
@@ -80,6 +82,7 @@ const SettingsModal: React.FC<SettingsModalProps> = ({
   const [webdavSuccess, setWebdavSuccess] = useState<string>('');
   const [webdavLoading, setWebdavLoading] = useState(false);
   const [logsModal, setLogsModal] = useState(false);
+  const [passwordModal, setPasswordModal] = useState(false);
 
   // 注意：环境变量配置现在由后端API处理
   // 前端只需要提供手动配置选项
@@ -201,6 +204,30 @@ const SettingsModal: React.FC<SettingsModalProps> = ({
         ? [...prev.notificationMethods, method as NotificationMethod]
         : prev.notificationMethods.filter(m => m !== method)
     }));
+  };
+
+  const handleLogsPasswordConfirm = async (password: string) => {
+    try {
+      const isValid = await verifyAdminPassword(password);
+      
+      if (!isValid) {
+        alert('管理员密码不正确，请重试');
+        return;
+      }
+      
+      // 密码验证成功，打开日志模态框
+      setPasswordModal(false);
+      setLogsModal(true);
+      
+    } catch (error: any) {
+      console.error('密码验证失败:', error);
+      const errorMessage = error.message || '密码验证过程中发生错误';
+      alert(`验证失败: ${errorMessage}`);
+    }
+  };
+
+  const handleLogsPasswordCancel = () => {
+    setPasswordModal(false);
   };
 
   if (!isOpen) return null;
@@ -526,7 +553,7 @@ const SettingsModal: React.FC<SettingsModalProps> = ({
                 className="btn btn-logs"
                 onClick={(e) => {
                   e.stopPropagation();
-                  setLogsModal(true);
+                  setPasswordModal(true);
                 }}
               >
                 📋 查看系统日志
@@ -540,6 +567,17 @@ const SettingsModal: React.FC<SettingsModalProps> = ({
         <LogsModal
           isOpen={logsModal}
           onClose={() => setLogsModal(false)}
+        />
+
+        {/* 密码验证模态框 */}
+        <PasswordModal
+          isOpen={passwordModal}
+          title="🔐 管理员验证"
+          message="查看系统日志需要管理员权限，请输入管理员密码："
+          onConfirm={handleLogsPasswordConfirm}
+          onCancel={handleLogsPasswordCancel}
+          confirmText="验证并查看"
+          cancelText="取消"
         />
       </div>
     </div>
