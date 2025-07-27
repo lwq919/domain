@@ -123,11 +123,11 @@ export async function webdavBackup(webdavConfig: WebDAVConfig): Promise<WebDAVRe
   return data;
 }
 
-export async function webdavRestore(webdavConfig: WebDAVConfig): Promise<WebDAVResponse> {
+export async function webdavRestore(webdavConfig: WebDAVConfig, filename?: string): Promise<WebDAVResponse> {
   const res = await fetchWithRetry('/api/webdav', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ action: 'restore', webdavConfig })
+    body: JSON.stringify({ action: 'restore', webdavConfig, filename })
   });
   
   if (!res.ok) {
@@ -141,6 +141,8 @@ export async function webdavRestore(webdavConfig: WebDAVConfig): Promise<WebDAVR
   
   return data;
 }
+
+
 
 export interface LogEntry {
   id?: number;
