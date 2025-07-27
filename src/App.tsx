@@ -603,6 +603,7 @@ const App: React.FC = () => {
   // WebDAV恢复功能
   async function handleWebDAVRestore() {
     try {
+      // 不指定文件名，让后端自动选择最新的备份文件
       const result = await webdavRestore({});
       // 重新加载域名数据
       await loadDomains();
