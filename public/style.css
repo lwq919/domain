@@ -445,18 +445,21 @@ td {
     display: flex;
     align-items: center;
     gap: 8px;
-    color: #333;
+    color: #fff;
     cursor: pointer;
     padding: 8px 12px;
-    background: #f8f9fa;
+    background: rgba(255, 255, 255, 0.2);
     border-radius: 8px;
     transition: all 0.3s ease;
     border: 2px solid transparent;
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
 }
 
 .settings-modal-body .checkbox-group label:hover {
-    background: #e9ecef;
-    border-color: #667eea;
+    background: rgba(255, 255, 255, 0.3);
+    border-color: rgba(102, 126, 234, 0.6);
 }
 
 .settings-modal-body .checkbox-group input[type="checkbox"] {
@@ -576,16 +579,18 @@ td {
 
 .settings-modal-body {
     padding: 24px;
-    background: rgba(255, 255, 255, 0.95);
+    background: rgba(255, 255, 255, 0.25);
     backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
 }
 
 .settings-modal-footer {
-    background: rgba(255, 255, 255, 0.95);
+    background: rgba(255, 255, 255, 0.25);
     backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
     border-radius: 0 0 16px 16px;
     padding: 20px 24px;
-    border-top: 1px solid rgba(0, 0, 0, 0.1);
+    border-top: 1px solid rgba(255, 255, 255, 0.2);
 }
 
 /* 开关样式 */
@@ -599,7 +604,8 @@ td {
     gap: 12px;
     cursor: pointer;
     font-weight: 500;
-    color: #333;
+    color: #fff;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
 }
 
 .toggle-switch {
@@ -650,6 +656,8 @@ td {
 .toggle-text {
     font-size: 1rem;
     font-weight: 500;
+    color: #fff;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
 }
 
 /* 表单元素美化 */
@@ -657,39 +665,49 @@ td {
     display: block;
     margin-bottom: 8px;
     font-weight: 500;
-    color: #333;
+    color: #fff;
     font-size: 0.95rem;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
 }
 
 .form-input, .form-select {
     width: 100%;
     padding: 12px 16px;
-    border: 2px solid #e1e5e9;
+    border: 2px solid rgba(255, 255, 255, 0.3);
     border-radius: 8px;
     font-size: 14px;
     transition: all 0.3s ease;
-    background: white;
-    color: #333;
+    background: rgba(255, 255, 255, 0.15);
+    color: #fff;
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+}
+
+.form-input::placeholder {
+    color: rgba(255, 255, 255, 0.6);
 }
 
 .form-input:focus, .form-select:focus {
     outline: none;
-    border-color: #667eea;
-    box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+    border-color: rgba(102, 126, 234, 0.8);
+    box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.2);
+    background: rgba(255, 255, 255, 0.25);
 }
 
 .form-input:disabled, .form-select:disabled {
-    background: #f8f9fa;
-    color: #6c757d;
+    background: rgba(255, 255, 255, 0.1);
+    color: rgba(255, 255, 255, 0.5);
     cursor: not-allowed;
+    border-color: rgba(255, 255, 255, 0.1);
 }
 
 .form-hint {
     display: block;
     margin-top: 6px;
     font-size: 0.85rem;
-    color: #6c757d;
+    color: rgba(255, 255, 255, 0.8);
     font-style: italic;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
 }
 
 /* 复选框美化 - 已合并到上面的设置模态框样式中 */
@@ -712,26 +730,34 @@ td {
 }
 
 .btn-cancel {
-    background: #f8f9fa;
-    color: #6c757d;
-    border: 2px solid #e9ecef;
+    background: rgba(255, 255, 255, 0.2);
+    color: #fff;
+    border: 2px solid rgba(255, 255, 255, 0.3);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
 }
 
 .btn-cancel:hover {
-    background: #e9ecef;
-    color: #495057;
+    background: rgba(255, 255, 255, 0.3);
+    color: #fff;
     transform: translateY(-2px);
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    border-color: rgba(255, 255, 255, 0.5);
 }
 
 .btn-save {
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    background: linear-gradient(135deg, rgba(102, 126, 234, 0.8) 0%, rgba(118, 75, 162, 0.8) 100%);
     color: white;
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.2);
 }
 
 .btn-save:hover {
     transform: translateY(-2px);
     box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+    background: linear-gradient(135deg, rgba(102, 126, 234, 0.9) 0%, rgba(118, 75, 162, 0.9) 100%);
 }
 
 /* 响应式设计 */
