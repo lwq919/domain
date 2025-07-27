@@ -266,9 +266,9 @@ const DomainTable: React.FC<DomainTableProps> = ({
           {[10, 20, 50, 100].map(size => <option key={size} value={size}>{size}</option>)}
         </select>
         <span>条</span>
-        <button className="btn" style={{ backgroundColor: '#ffb6c1', borderColor: '#ffb6c1', color: '#fff' }} disabled={page === 1} onClick={() => onPageChange(Math.max(1, page - 1))}>上一页</button>
+        <button className="btn-pagination" disabled={page === 1} onClick={() => onPageChange(Math.max(1, page - 1))}>上一页</button>
         <span style={{ fontWeight: 700, fontSize: 18, minWidth: 120, textAlign: 'center', display: 'inline-block' }}>第 {page} / {totalPages} 页</span>
-        <button className="btn" style={{ backgroundColor: '#ffb6c1', borderColor: '#ffb6c1', color: '#fff' }} disabled={page === totalPages} onClick={() => onPageChange(Math.min(totalPages, page + 1))}>下一页</button>
+        <button className="btn-pagination" disabled={page === totalPages} onClick={() => onPageChange(Math.min(totalPages, page + 1))}>下一页</button>
       </div>
     </div>
   );
