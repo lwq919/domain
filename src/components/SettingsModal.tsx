@@ -265,51 +265,51 @@ const SettingsModal: React.FC<SettingsModalProps> = ({
 
               <div className="form-group">
                 <label className="form-label">通知方式：</label>
-                <div className="checkbox-group">
-                  <label>
+                <div className="checkbox-group notification-methods">
+                  <label className="notification-method email-method">
                     <input
                       type="checkbox"
                       checked={form.notificationMethods.includes('email')}
                       onChange={e => handleNotificationMethodChange('email', e.target.checked)}
                       disabled={form.notificationEnabled !== 'true'}
                     />
-                    📧 邮件
+                    <span>📧 邮件</span>
                   </label>
-                  <label>
+                  <label className="notification-method telegram-method">
                     <input
                       type="checkbox"
                       checked={form.notificationMethods.includes('telegram')}
                       onChange={e => handleNotificationMethodChange('telegram', e.target.checked)}
                       disabled={form.notificationEnabled !== 'true'}
                     />
-                    📱 Telegram
+                    <span>📱 Telegram</span>
                   </label>
-                  <label>
+                  <label className="notification-method wechat-method">
                     <input
                       type="checkbox"
                       checked={form.notificationMethods.includes('wechat')}
                       onChange={e => handleNotificationMethodChange('wechat', e.target.checked)}
                       disabled={form.notificationEnabled !== 'true'}
                     />
-                    💬 微信 (Server酱)
+                    <span>💬 微信 (Server酱)</span>
                   </label>
-                  <label>
+                  <label className="notification-method qq-method">
                     <input
                       type="checkbox"
                       checked={form.notificationMethods.includes('qq')}
                       onChange={e => handleNotificationMethodChange('qq', e.target.checked)}
                       disabled={form.notificationEnabled !== 'true'}
                     />
-                    🐧 QQ (Qmsg酱)
+                    <span>🐧 QQ (Qmsg酱)</span>
                   </label>
-                  <label>
+                  <label className="notification-method webhook-method">
                     <input
                       type="checkbox"
                       checked={form.notificationMethods.includes('webhook')}
                       onChange={e => handleNotificationMethodChange('webhook', e.target.checked)}
                       disabled={form.notificationEnabled !== 'true'}
                     />
-                    🔗 Webhook
+                    <span>🔗 Webhook</span>
                   </label>
                 </div>
               </div>
