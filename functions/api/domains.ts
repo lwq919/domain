@@ -1,4 +1,4 @@
-import { Domain, validateDomain, createErrorResponse, createSuccessResponse, validateDomainsArray } from './common';
+import { Domain, validateDomain, createErrorResponse, createSuccessResponse, validateDomainsArray, initializeDatabase } from './common';
 
 // 记录操作日志的函数
 async function logOperation(env: any, action: string, details: string, status: 'success' | 'error' | 'warning' = 'success') {
@@ -7,12 +7,11 @@ async function logOperation(env: any, action: string, details: string, status: '
     const ipAddress = '127.0.0.1'; // 本地操作
     
     await env.DB.prepare(
-      'INSERT INTO operation_logs (action, details, status, timestamp, user_agent, ip_address) VALUES (?, ?, ?, ?, ?, ?)'
+      'INSERT INTO operation_logs (action, details, status, user_agent, ip_address) VALUES (?, ?, ?, ?, ?)'
     ).bind(
       action,
       details,
       status,
-      new Date().toISOString(),
       userAgent,
       ipAddress
     ).run();
@@ -24,6 +23,14 @@ async function logOperation(env: any, action: string, details: string, status: '
 export const onRequest = async (context: any) => {
   const { request, env } = context;
   const method = request.method.toUpperCase();
+
+  // 确保数据库已初始化
+  try {
+    await initializeDatabase(env);
+  } catch (error) {
+    console.error('数据库初始化失败:', error);
+    return createErrorResponse('数据库初始化失败', 500);
+  }
 
   if (method === 'GET') {
     try {
