@@ -4,4 +4,5 @@ export { default as DomainModal } from './DomainModal';
 export { default as ConfirmModal } from './ConfirmModal';
 export { default as ExpireModal } from './ExpireModal';
 export { default as InfoModal } from './InfoModal';
-export { default as PasswordModal } from './PasswordModal'; 
+export { default as PasswordModal } from './PasswordModal';
+export { default as SettingsModal } from './SettingsModal'; 
