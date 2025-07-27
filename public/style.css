@@ -374,6 +374,16 @@ td {
     backdrop-filter: blur(10px);
     box-shadow: 0 2px 12px rgba(0,0,0,0.06);
 }
+.settings-section h3 {
+    margin: 0 0 25px 0;
+    color: #333;
+    font-size: 1.3rem;
+    font-weight: 600;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+    padding-bottom: 8px;
+    border-bottom: 2px solid rgba(255, 255, 255, 0.3);
+}
+
 .settings-section h4 {
     margin: 0 0 15px 0;
     color: #333;
@@ -598,6 +608,7 @@ td {
 /* 开关样式 */
 .toggle-group {
     margin-bottom: 20px;
+    margin-top: 8px;
 }
 
 .toggle-label {
@@ -688,26 +699,7 @@ td {
         inset 0 1px 2px rgba(255, 255, 255, 0.9) !important;
 }
 
-/* 添加状态指示器 */
-.toggle-switch:after {
-    content: "OFF";
-    position: absolute;
-    right: -35px;
-    top: 50%;
-    transform: translateY(-50%);
-    font-size: 10px;
-    font-weight: 600;
-    color: #6b7280;
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
-    transition: all 0.3s ease;
-}
-
-.toggle-input:checked + .toggle-switch:after {
-    content: "ON";
-    color: #10b981;
-    font-weight: 700;
-}
+/* 状态指示器已移除 */
 
 .toggle-switch:hover .toggle-slider {
     transform: scale(1.02) !important;
