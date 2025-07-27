@@ -497,6 +497,92 @@ td {
     border-color: rgba(255, 255, 255, 0.6);
 }
 
+/* 通知方式渐变样式 */
+.notification-methods {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.notification-method {
+    background: linear-gradient(135deg, rgba(255, 255, 255, 0.3) 0%, rgba(255, 255, 255, 0.2) 100%) !important;
+    border: 2px solid rgba(255, 255, 255, 0.2) !important;
+    transition: all 0.3s ease !important;
+}
+
+.notification-method:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.notification-method input[type="checkbox"]:checked ~ span {
+    font-weight: 600;
+}
+
+.notification-method input[type="checkbox"]:checked {
+    accent-color: #fff;
+}
+
+/* 邮件通知方式 - 蓝色渐变 */
+.email-method {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important;
+    border-color: rgba(102, 126, 234, 0.3) !important;
+}
+
+.email-method:hover {
+    background: linear-gradient(135deg, #5a6fd8 0%, #6a4c93 100%) !important;
+    border-color: rgba(102, 126, 234, 0.5) !important;
+    box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+}
+
+/* Telegram通知方式 - 青色渐变 */
+.telegram-method {
+    background: linear-gradient(135deg, #00b4db 0%, #0083b0 100%) !important;
+    border-color: rgba(0, 180, 219, 0.3) !important;
+}
+
+.telegram-method:hover {
+    background: linear-gradient(135deg, #0099c7 0%, #007299 100%) !important;
+    border-color: rgba(0, 180, 219, 0.5) !important;
+    box-shadow: 0 4px 12px rgba(0, 180, 219, 0.3);
+}
+
+/* 微信通知方式 - 绿色渐变 */
+.wechat-method {
+    background: linear-gradient(135deg, #56ab2f 0%, #a8e6cf 100%) !important;
+    border-color: rgba(86, 171, 47, 0.3) !important;
+}
+
+.wechat-method:hover {
+    background: linear-gradient(135deg, #4a9a26 0%, #97d4b8 100%) !important;
+    border-color: rgba(86, 171, 47, 0.5) !important;
+    box-shadow: 0 4px 12px rgba(86, 171, 47, 0.3);
+}
+
+/* QQ通知方式 - 橙色渐变 */
+.qq-method {
+    background: linear-gradient(135deg, #ff9a9e 0%, #fecfef 100%) !important;
+    border-color: rgba(255, 154, 158, 0.3) !important;
+}
+
+.qq-method:hover {
+    background: linear-gradient(135deg, #ff8a8e 0%, #febfdf 100%) !important;
+    border-color: rgba(255, 154, 158, 0.5) !important;
+    box-shadow: 0 4px 12px rgba(255, 154, 158, 0.3);
+}
+
+/* Webhook通知方式 - 紫色渐变 */
+.webhook-method {
+    background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%) !important;
+    border-color: rgba(240, 147, 251, 0.3) !important;
+}
+
+.webhook-method:hover {
+    background: linear-gradient(135deg, #e083eb 0%, #e5475c 100%) !important;
+    border-color: rgba(240, 147, 251, 0.5) !important;
+    box-shadow: 0 4px 12px rgba(240, 147, 251, 0.3);
+}
+
 .settings-modal-body .checkbox-group input[type="checkbox"] {
     width: 18px;
     height: 18px;
@@ -1203,5 +1289,14 @@ td {
     .btn-restore {
         width: 100%;
         justify-content: center;
+    }
+    
+    .notification-methods {
+        gap: 8px;
+    }
+    
+    .notification-method {
+        padding: 12px 14px !important;
+        font-size: 12px !important;
     }
 } 
