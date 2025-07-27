@@ -492,25 +492,6 @@ const SettingsModal: React.FC<SettingsModalProps> = ({
 
           </div>
 
-          {/* 系统日志 - 移到form外面 */}
-          <div className="settings-section" style={{ marginTop: '20px', paddingTop: '20px', borderTop: '1px solid rgba(255, 255, 255, 0.1)' }}>
-            <h3>📋 系统日志</h3>
-            
-            <div className="form-group">
-              <label className="form-label">日志管理：</label>
-              <div className="logs-buttons">
-                <button
-                  type="button"
-                  className="btn btn-logs"
-                  onClick={() => setLogsModal(true)}
-                >
-                  📋 查看系统日志
-                </button>
-              </div>
-              <small className="form-hint">查看操作日志和通知日志，支持筛选和清理功能</small>
-            </div>
-          </div>
-
           <div className="modal-footer settings-modal-footer">
             <button type="button" className="btn btn-cancel-settings" onClick={onClose}>
               <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -528,6 +509,32 @@ const SettingsModal: React.FC<SettingsModalProps> = ({
             </button>
           </div>
         </form>
+
+        {/* 系统日志 */}
+        <div 
+          className="settings-section" 
+          style={{ marginTop: '20px', paddingTop: '20px', borderTop: '1px solid rgba(255, 255, 255, 0.1)' }}
+          onClick={(e) => e.stopPropagation()}
+        >
+          <h3>📋 系统日志</h3>
+          
+          <div className="form-group">
+            <label className="form-label">日志管理：</label>
+            <div className="logs-buttons">
+              <button
+                type="button"
+                className="btn btn-logs"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setLogsModal(true);
+                }}
+              >
+                📋 查看系统日志
+              </button>
+            </div>
+            <small className="form-hint">查看操作日志和通知日志，支持筛选和清理功能</small>
+          </div>
+        </div>
 
         {/* 日志模态框 */}
         <LogsModal
