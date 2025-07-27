@@ -90,6 +90,7 @@ const SettingsModal: React.FC<SettingsModalProps> = ({
               
               <div className="form-group toggle-group">
                 <label className="toggle-label">
+                  <span className="toggle-text">启用到期提醒</span>
                   <div className="toggle-switch">
                     <input
                       type="checkbox"
@@ -99,7 +100,6 @@ const SettingsModal: React.FC<SettingsModalProps> = ({
                     />
                     <span className="toggle-slider"></span>
                   </div>
-                  <span className="toggle-text">启用到期提醒</span>
                 </label>
               </div>
 
