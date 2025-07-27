@@ -156,6 +156,7 @@ export interface LogEntry {
   notification_method?: string;
   message?: string;
   error_details?: string;
+  device_info?: string;
 }
 
 export interface LogsResponse {
@@ -212,6 +213,24 @@ export async function logOperation(action: string, details: string, status: 'suc
     });
   } catch (error) {
     console.error('记录操作日志失败:', error);
+  }
+}
+
+export async function logAccess(action: string, details: string, status: 'success' | 'error' | 'warning' = 'success', device_info?: string): Promise<void> {
+  try {
+    await fetch('/api/logs', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        type: 'access',
+        action,
+        details,
+        status,
+        device_info
+      })
+    });
+  } catch (error) {
+    console.error('记录访问日志失败:', error);
   }
 }
 
