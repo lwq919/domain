@@ -177,12 +177,12 @@ const SettingsModal: React.FC<SettingsModalProps> = ({
     }
   };
 
-  // 处理WebDAV恢复
+    // 处理WebDAV恢复
   const handleWebDAVRestore = async () => {
     setWebdavLoading(true);
     setWebdavError('');
     setWebdavSuccess('');
-
+    
     try {
       if (onWebDAVRestore) {
         await onWebDAVRestore();
@@ -194,6 +194,8 @@ const SettingsModal: React.FC<SettingsModalProps> = ({
       setWebdavLoading(false);
     }
   };
+
+
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -505,7 +507,7 @@ const SettingsModal: React.FC<SettingsModalProps> = ({
                     {webdavLoading ? '🔄 恢复中...' : '📥 从WebDAV恢复'}
                   </button>
                 </div>
-                <small className="form-hint">使用Cloudflare Pages环境变量中的WebDAV配置进行备份和恢复。备份文件将存储到WebDAV服务器的domain文件夹中。</small>
+                <small className="form-hint">使用Cloudflare Pages环境变量中的WebDAV配置进行备份和恢复</small>
               </div>
 
               {/* WebDAV操作结果提示 */}
