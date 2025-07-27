@@ -1282,6 +1282,7 @@ table td.loading {
 
 .log-domain,
 .log-method,
+.log-device,
 .log-error {
   color: rgba(255, 255, 255, 0.8);
   font-size: 14px;
