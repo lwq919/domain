@@ -314,100 +314,14 @@ const SettingsModal: React.FC<SettingsModalProps> = ({
                 </div>
               </div>
 
-              {/* 通知配置区域 */}
-              {(form.notificationMethods.includes('email') || 
-                form.notificationMethods.includes('telegram') || 
-                form.notificationMethods.includes('wechat') || 
-                form.notificationMethods.includes('qq') || 
-                form.notificationMethods.includes('webhook')) && (
+              {/* 通知配置说明 */}
+              {form.notificationMethods.length > 0 && (
                 <div className="notification-config">
-                  {/* 邮件配置 */}
-                  {form.notificationMethods.includes('email') && (
-                    <div className="form-group">
-                      <label className="form-label">📧 邮件配置：</label>
-                      <input
-                        type="email"
-                        className="form-input"
-                        placeholder="接收通知的邮箱地址"
-                        value={form.emailConfig || ''}
-                        onChange={e => setForm(prev => ({ ...prev, emailConfig: e.target.value }))}
-                        disabled={form.notificationEnabled !== 'true'}
-                      />
-                      <small className="form-hint">请输入接收通知的邮箱地址</small>
-                    </div>
-                  )}
-
-                  {/* Telegram配置 */}
-                  {form.notificationMethods.includes('telegram') && (
-                    <div className="form-group">
-                      <label className="form-label">📱 Telegram配置：</label>
-                      <input
-                        type="text"
-                        className="form-input"
-                        placeholder="Bot Token"
-                        value={form.telegramBotToken || ''}
-                        onChange={e => setForm(prev => ({ ...prev, telegramBotToken: e.target.value }))}
-                        disabled={form.notificationEnabled !== 'true'}
-                      />
-                      <input
-                        type="text"
-                        className="form-input"
-                        placeholder="Chat ID"
-                        value={form.telegramChatId || ''}
-                        onChange={e => setForm(prev => ({ ...prev, telegramChatId: e.target.value }))}
-                        disabled={form.notificationEnabled !== 'true'}
-                      />
-                      <small className="form-hint">请配置Bot Token和Chat ID</small>
-                    </div>
-                  )}
-
-                  {/* 微信配置 */}
-                  {form.notificationMethods.includes('wechat') && (
-                    <div className="form-group">
-                      <label className="form-label">💬 微信配置：</label>
-                      <input
-                        type="text"
-                        className="form-input"
-                        placeholder="Server酱 SendKey"
-                        value={form.wechatSendKey || ''}
-                        onChange={e => setForm(prev => ({ ...prev, wechatSendKey: e.target.value }))}
-                        disabled={form.notificationEnabled !== 'true'}
-                      />
-                      <small className="form-hint">请输入Server酱的SendKey</small>
-                    </div>
-                  )}
-
-                  {/* QQ配置 */}
-                  {form.notificationMethods.includes('qq') && (
-                    <div className="form-group">
-                      <label className="form-label">🐧 QQ配置：</label>
-                      <input
-                        type="text"
-                        className="form-input"
-                        placeholder="Qmsg酱 Key"
-                        value={form.qqKey || ''}
-                        onChange={e => setForm(prev => ({ ...prev, qqKey: e.target.value }))}
-                        disabled={form.notificationEnabled !== 'true'}
-                      />
-                      <small className="form-hint">请输入Qmsg酱的Key</small>
-                    </div>
-                  )}
-
-                  {/* Webhook配置 */}
-                  {form.notificationMethods.includes('webhook') && (
-                    <div className="form-group">
-                      <label className="form-label">🔗 Webhook配置：</label>
-                      <input
-                        type="url"
-                        className="form-input"
-                        placeholder="Webhook URL"
-                        value={form.webhookUrl || ''}
-                        onChange={e => setForm(prev => ({ ...prev, webhookUrl: e.target.value }))}
-                        disabled={form.notificationEnabled !== 'true'}
-                      />
-                      <small className="form-hint">请输入Webhook的URL地址</small>
-                    </div>
-                  )}
+                  <div className="form-group">
+                    <small className="form-hint">
+                      💡 通知配置请在Cloudflare Pages环境变量中设置，无需在此输入
+                    </small>
+                  </div>
                 </div>
               )}
             </div>
