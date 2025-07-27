@@ -9,6 +9,7 @@ import {
 } from '../utils';
 import { verifyAdminPassword } from '../api';
 import PasswordModal from './PasswordModal';
+import ConfirmModal from './ConfirmModal';
 
 interface SettingsModalProps {
   isOpen: boolean;
@@ -83,6 +84,9 @@ const SettingsModal: React.FC<SettingsModalProps> = ({
   const [webdavSuccess, setWebdavSuccess] = useState<string>('');
   const [webdavLoading, setWebdavLoading] = useState(false);
   const [passwordModal, setPasswordModal] = useState(false);
+  const [alertModal, setAlertModal] = useState(false);
+  const [alertMessage, setAlertMessage] = useState('');
+  const [alertType, setAlertType] = useState<'success' | 'error'>('success');
 
   // 注意：环境变量配置现在由后端API处理
   // 前端只需要提供手动配置选项
@@ -211,7 +215,9 @@ const SettingsModal: React.FC<SettingsModalProps> = ({
       const isValid = await verifyAdminPassword(password);
       
       if (!isValid) {
-        alert('管理员密码不正确，请重试');
+        setAlertMessage('管理员密码不正确，请重试');
+        setAlertType('error');
+        setAlertModal(true);
         return;
       }
       
@@ -224,12 +230,18 @@ const SettingsModal: React.FC<SettingsModalProps> = ({
     } catch (error: any) {
       console.error('密码验证失败:', error);
       const errorMessage = error.message || '密码验证过程中发生错误';
-      alert(`验证失败: ${errorMessage}`);
+      setAlertMessage(`验证失败: ${errorMessage}`);
+      setAlertType('error');
+      setAlertModal(true);
     }
   };
 
   const handleLogsPasswordCancel = () => {
     setPasswordModal(false);
+  };
+
+  const handleAlertClose = () => {
+    setAlertModal(false);
   };
 
   if (!isOpen) return null;
@@ -574,6 +586,17 @@ const SettingsModal: React.FC<SettingsModalProps> = ({
           onCancel={handleLogsPasswordCancel}
           confirmText="验证并查看"
           cancelText="取消"
+        />
+
+        {/* 提示信息模态框 */}
+        <ConfirmModal
+          isOpen={alertModal}
+          title={alertType === 'success' ? '操作成功' : '操作失败'}
+          message={alertMessage}
+          onConfirm={handleAlertClose}
+          onCancel={handleAlertClose}
+          confirmText="确定"
+          type="alert"
         />
       </div>
     </div>
