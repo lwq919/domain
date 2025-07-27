@@ -29,6 +29,7 @@ import ConfirmModal from './components/ConfirmModal';
 import ExpireModal from './components/ExpireModal';
 import InfoModal from './components/InfoModal';
 import PasswordModal from './components/PasswordModal';
+import SettingsModal from './components/SettingsModal';
 
 const App: React.FC = () => {
   // 状态管理
@@ -57,6 +58,7 @@ const App: React.FC = () => {
   const [infoModal, setInfoModal] = useState(false);
   const [infoMessage, setInfoMessage] = useState('');
   const [infoTitle, setInfoTitle] = useState('');
+  const [settingsModal, setSettingsModal] = useState(false);
 
   // 通知相关状态
   const [warningDays, setWarningDays] = useState(() => localStorage.getItem('notificationWarningDays') || '15');
@@ -441,6 +443,46 @@ const App: React.FC = () => {
     setInfoModal(true);
   }
 
+  async function handleSettingsSave(settings: {
+    warningDays: string;
+    notificationEnabled: string;
+    notificationInterval: string;
+    notificationMethods: NotificationMethod[];
+    bgImageUrl: string;
+    carouselInterval: number;
+  }) {
+    try {
+      // 保存通知设置到服务器
+      await saveNotificationSettingsToServer({
+        warningDays: settings.warningDays,
+        notificationEnabled: settings.notificationEnabled,
+        notificationInterval: settings.notificationInterval,
+        notificationMethod: JSON.stringify(settings.notificationMethods)
+      });
+
+      // 更新本地状态
+      setWarningDays(settings.warningDays);
+      setNotificationEnabled(settings.notificationEnabled);
+      setNotificationInterval(settings.notificationInterval);
+      setNotificationMethods(settings.notificationMethods);
+      setBgImageUrl(settings.bgImageUrl);
+      setCarouselInterval(settings.carouselInterval);
+
+      // 保存到本地存储
+      localStorage.setItem('notificationWarningDays', settings.warningDays);
+      localStorage.setItem('notificationEnabled', settings.notificationEnabled);
+      localStorage.setItem('notificationInterval', settings.notificationInterval);
+      localStorage.setItem('customBgImageUrl', settings.bgImageUrl);
+      localStorage.setItem('carouselInterval', settings.carouselInterval.toString());
+
+      setOpMsg('设置保存成功');
+    } catch (error: any) {
+      console.error('保存设置失败:', error);
+      const errorMessage = error.message || '保存设置时发生错误';
+      showInfoModal('保存失败', `请重试: ${errorMessage}`);
+    }
+  }
+
   // 导出导入功能
   function handleExport(format: ExportFormat) {
     if (!domains || domains.length === 0) {
@@ -498,7 +540,7 @@ const App: React.FC = () => {
       <div className="header">
         <h1>域名面板</h1>
         <p>查看域名状态、注册商、注册日期、过期日期和使用进度</p>
-        <button className="settings-btn" onClick={() => {/* 设置按钮逻辑 */}}>⚙️</button>
+        <button className="settings-btn" onClick={() => setSettingsModal(true)}>⚙️</button>
       </div>
 
       <StatsGrid domains={domains} />
@@ -587,6 +629,18 @@ const App: React.FC = () => {
         onCancel={handlePasswordCancel}
         confirmText="验证并删除"
         cancelText="取消"
+      />
+
+      <SettingsModal
+        isOpen={settingsModal}
+        onClose={() => setSettingsModal(false)}
+        warningDays={warningDays}
+        notificationEnabled={notificationEnabled}
+        notificationInterval={notificationInterval}
+        notificationMethods={notificationMethods}
+        bgImageUrl={bgImageUrl}
+        carouselInterval={carouselInterval}
+        onSave={handleSettingsSave}
       />
     </div>
   );
