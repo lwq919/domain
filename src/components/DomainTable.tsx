@@ -172,7 +172,17 @@ const DomainTable: React.FC<DomainTableProps> = ({
             {loading ? (
               <tr><td colSpan={showRegistrar && showProgress ? 11 : 9} className="loading">加载中...</td></tr>
             ) : paged.length === 0 ? (
-              <tr><td colSpan={showRegistrar && showProgress ? 11 : 9} className="loading" style={{ textAlign: 'center', display: 'flex', alignItems: 'center', justifyContent: 'center', width: '100%', height: '200px' }}>暂无域名数据</td></tr>
+              <tr style={{ height: '200px' }}>
+                <td colSpan={showRegistrar && showProgress ? 11 : 9} style={{ 
+                  textAlign: 'center', 
+                  verticalAlign: 'middle',
+                  height: '200px',
+                  fontSize: '16px',
+                  color: '#666'
+                }}>
+                  暂无域名数据
+                </td>
+              </tr>
             ) : paged.map((domain, index) => {
               const progress = calculateProgress(domain.register_date, domain.expire_date);
               const progressClass = getProgressClass(progress);
