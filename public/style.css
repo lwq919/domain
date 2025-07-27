@@ -1376,24 +1376,28 @@ table td.loading {
 }
 
 .btn-page {
-  background: rgba(255, 255, 255, 0.1);
-  border: 1px solid rgba(255, 255, 255, 0.2);
-  color: #fff;
+  background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+  color: white;
+  border: none;
   padding: 8px 16px;
   border-radius: 8px;
   cursor: pointer;
   transition: all 0.3s ease;
   font-weight: 500;
+  box-shadow: 0 2px 8px rgba(240, 147, 251, 0.3);
 }
 
 .btn-page:hover:not(:disabled) {
-  background: rgba(255, 255, 255, 0.2);
-  border-color: rgba(255, 255, 255, 0.3);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(240, 147, 251, 0.4);
 }
 
 .btn-page:disabled {
-  opacity: 0.5;
+  opacity: 0.6;
   cursor: not-allowed;
+  transform: none;
+  background: linear-gradient(135deg, #ccc 0%, #999 100%);
+  box-shadow: none;
 }
 
 .page-info {
@@ -1739,6 +1743,33 @@ table td.loading {
     opacity: 0.6;
     cursor: not-allowed;
     transform: none;
+}
+
+/* 分页按钮样式 - 使用与WebDAV恢复按钮相同的渐变效果 */
+.btn-pagination {
+    background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+    color: white;
+    border: none;
+    padding: 8px 16px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 14px;
+    font-weight: 500;
+    transition: all 0.3s ease;
+    box-shadow: 0 2px 8px rgba(240, 147, 251, 0.3);
+}
+
+.btn-pagination:hover:not(:disabled) {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(240, 147, 251, 0.4);
+}
+
+.btn-pagination:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+    transform: none;
+    background: linear-gradient(135deg, #ccc 0%, #999 100%);
+    box-shadow: none;
 }
 
 .webdav-error {
