@@ -260,16 +260,28 @@ const DomainTable: React.FC<DomainTableProps> = ({
         </table>
       </div>
       
-      <div style={{ margin: '10px 0', display: 'flex', gap: 10, flexWrap: 'wrap', alignItems: 'center', justifyContent: 'center', width: '100%', maxWidth: 900, paddingLeft: 180 }}>
-        <span>每页</span>
-        <select value={pageSize} onChange={e => { onPageSizeChange(Number(e.target.value)); onPageChange(1); }}>
-          {[10, 20, 50, 100].map(size => <option key={size} value={size}>{size}</option>)}
-        </select>
-        <span>条</span>
-        <button className="btn-pagination" disabled={page === 1} onClick={() => onPageChange(Math.max(1, page - 1))}>上一页</button>
-        <span style={{ fontWeight: 700, fontSize: 18, minWidth: 120, textAlign: 'center', display: 'inline-block' }}>第 {page} / {totalPages} 页</span>
-        <button className="btn-pagination" disabled={page === totalPages} onClick={() => onPageChange(Math.min(totalPages, page + 1))}>下一页</button>
-      </div>
+      {totalPages > 1 && (
+        <div style={{ margin: '10px 0', display: 'flex', gap: 10, flexWrap: 'wrap', alignItems: 'center', justifyContent: 'center', width: '100%', maxWidth: 900, paddingLeft: 180 }}>
+          <span>每页</span>
+          <select value={pageSize} onChange={e => { onPageSizeChange(Number(e.target.value)); onPageChange(1); }}>
+            {[10, 20, 50, 100].map(size => <option key={size} value={size}>{size}</option>)}
+          </select>
+          <span>条</span>
+          <button className="btn-pagination" disabled={page === 1} onClick={() => onPageChange(Math.max(1, page - 1))}>上一页</button>
+          <span style={{ fontWeight: 700, fontSize: 18, minWidth: 120, textAlign: 'center', display: 'inline-block' }}>第 {page} / {totalPages} 页</span>
+          <button className="btn-pagination" disabled={page === totalPages} onClick={() => onPageChange(Math.min(totalPages, page + 1))}>下一页</button>
+        </div>
+      )}
+      {totalPages === 1 && filteredDomains().length > 0 && (
+        <div style={{ margin: '10px 0', display: 'flex', gap: 10, flexWrap: 'wrap', alignItems: 'center', justifyContent: 'center', width: '100%', maxWidth: 900, paddingLeft: 180 }}>
+          <span>每页</span>
+          <select value={pageSize} onChange={e => { onPageSizeChange(Number(e.target.value)); onPageChange(1); }}>
+            {[10, 20, 50, 100].map(size => <option key={size} value={size}>{size}</option>)}
+          </select>
+          <span>条</span>
+          <span style={{ fontWeight: 700, fontSize: 18, minWidth: 120, textAlign: 'center', display: 'inline-block', color: '#fff' }}>共 {filteredDomains().length} 条数据</span>
+        </div>
+      )}
     </div>
   );
 };
