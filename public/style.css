@@ -432,6 +432,74 @@ td {
     -webkit-backdrop-filter: blur(8px) !important;
     color: #333 !important;
 }
+
+/* 设置模态框样式 */
+.checkbox-group {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 15px;
+    margin-top: 10px;
+}
+
+.checkbox-group label {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    color: #fff;
+    cursor: pointer;
+    padding: 8px 12px;
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 8px;
+    transition: all 0.3s ease;
+}
+
+.checkbox-group label:hover {
+    background: rgba(255, 255, 255, 0.2);
+}
+
+.checkbox-group input[type="checkbox"] {
+    width: 16px;
+    height: 16px;
+    accent-color: #667eea;
+}
+
+.modal-footer {
+    display: flex;
+    justify-content: flex-end;
+    gap: 15px;
+    padding: 20px;
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.modal-footer .btn {
+    padding: 10px 20px;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 14px;
+    font-weight: 500;
+    transition: all 0.3s ease;
+}
+
+.modal-footer .btn-primary {
+    background: #667eea;
+    color: white;
+}
+
+.modal-footer .btn-primary:hover {
+    background: #5a6fd8;
+    transform: translateY(-2px);
+}
+
+.modal-footer .btn-secondary {
+    background: rgba(255, 255, 255, 0.2);
+    color: white;
+}
+
+.modal-footer .btn-secondary:hover {
+    background: rgba(255, 255, 255, 0.3);
+    transform: translateY(-2px);
+}
 @media (max-width: 768px) {
     .container {
         padding: 10px;
