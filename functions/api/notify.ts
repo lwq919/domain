@@ -40,6 +40,7 @@ async function sendWeChatNotify(title: string, content: string, sendKey: string)
   });
   return res.json();
 }
+
 // QQ Qmsg酱推送
 async function sendQQNotify(content: string, key: string, qq: string) {
   const res = await fetch(`https://qmsg.zendee.cn/send/${key}`, {
@@ -50,12 +51,11 @@ async function sendQQNotify(content: string, key: string, qq: string) {
   return res.json();
 }
 
-// 邮件通知（MailChannels）
-async function sendMailNotify(subject: string, content: string, mailTo: string) {
-  // MailChannels API（Cloudflare Pages Functions原生支持）
+// 邮件通知（MailChannels，Cloudflare Pages Functions原生支持）
+async function sendMailNotify(subject: string, content: string, mailTo: string, env: any) {
   const mailData = {
     personalizations: [{ to: [{ email: mailTo }] }],
-    from: { email: 'noreply@yourdomain.com', name: '域名到期提醒' },
+    from: { email: env.EMAIL_FROM, name: '域名到期提醒' },
     subject,
     content: [{ type: 'text/plain', value: content }]
   };
@@ -64,6 +64,10 @@ async function sendMailNotify(subject: string, content: string, mailTo: string) 
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(mailData)
   });
+  if (!res.ok) {
+    const errorText = await res.text();
+    throw new Error(`邮件发送失败: ${res.status} ${res.statusText} - ${errorText}`);
+  }
   return res.json();
 }
 
@@ -74,9 +78,9 @@ export const onRequest = async (context: any) => {
   if (method === 'GET') {
     // 查询通知设置
     try {
-              const { results } = await env.DB.prepare(
-          'SELECT warning_days as warningDays, notification_enabled as notificationEnabled, notification_interval as notificationInterval, notification_method as notificationMethods, email_config as emailConfig, telegram_bot_token as telegramBotToken, telegram_chat_id as telegramChatId, wechat_send_key as wechatSendKey, qq_key as qqKey, webhook_url as webhookUrl FROM notification_settings LIMIT 1'
-        ).all();
+      const { results } = await env.DB.prepare(
+        'SELECT warning_days as warningDays, notification_enabled as notificationEnabled, notification_interval as notificationInterval, notification_method as notificationMethods, email_config as emailConfig, telegram_bot_token as telegramBotToken, telegram_chat_id as telegramChatId, wechat_send_key as wechatSendKey, qq_key as qqKey, webhook_url as webhookUrl FROM notification_settings LIMIT 1'
+      ).all();
       if (results.length === 0) {
         return new Response(JSON.stringify({ success: true, settings: null }), {
           headers: { 'content-type': 'application/json' }
@@ -121,9 +125,9 @@ export const onRequest = async (context: any) => {
           s.webhookUrl || null
         ).run();
         return new Response(JSON.stringify({ success: true, message: '设置已保存' }), {
-      headers: { 'content-type': 'application/json' }
-    });
-  }
+          headers: { 'content-type': 'application/json' }
+        });
+      }
       // 多方式通知分发
       if (body.domains) {
         // 从环境变量获取通知配置
@@ -241,7 +245,7 @@ export const onRequest = async (context: any) => {
                 content += `域名: ${domain.domain}\n注册商: ${domain.registrar}\n到期时间: ${domain.expire_date}\n剩余天数: ${daysLeft}天\n\n`;
               });
               content += '请及时续费以避免域名过期！';
-              await sendMailNotify('域名到期提醒', content, mailTo);
+              await sendMailNotify('域名到期提醒', content, mailTo, env);
               results.push({ method: 'email', ok: true });
             } else if (method === 'webhook') {
               const webhookUrl = env.WEBHOOK_URL || settings.webhook_url;
@@ -290,13 +294,13 @@ export const onRequest = async (context: any) => {
       }
       return new Response(JSON.stringify({ success: false, error: '参数错误' }), {
         status: 400,
-      headers: { 'content-type': 'application/json' }
-    });
-  } catch (e: any) {
-    return new Response(JSON.stringify({ success: false, error: e.message }), {
-      status: 500,
-      headers: { 'content-type': 'application/json' }
-    });
+        headers: { 'content-type': 'application/json' }
+      });
+    } catch (e: any) {
+      return new Response(JSON.stringify({ success: false, error: e.message }), {
+        status: 500,
+        headers: { 'content-type': 'application/json' }
+      });
     }
   }
 }; 
