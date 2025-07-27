@@ -221,8 +221,8 @@ const DomainModal: React.FC<DomainModalProps> = ({
             />
           </div>
           <div className="modal-buttons">
-            <button type="button" className="btn btn-secondary" style={{ backgroundColor: '#ffb6c1', borderColor: '#ffb6c1', color: '#fff' }} onClick={onClose}>取消</button>
-            <button type="submit" className="btn btn-primary">保存</button>
+            <button type="button" className="btn btn-cancel-domain" onClick={onClose}>取消</button>
+            <button type="submit" className="btn btn-save-domain">保存</button>
           </div>
         </form>
       </div>
