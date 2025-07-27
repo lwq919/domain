@@ -498,6 +498,17 @@ const App: React.FC = () => {
     setInfoModal(true);
   }
 
+  // 处理域名数据导入
+  async function handleImportDomains(importedDomains: Domain[]) {
+    try {
+      await saveDomains(importedDomains);
+      setDomains(importedDomains);
+      showInfoModal('✅ 导入成功', `成功导入 ${importedDomains.length} 个域名`);
+    } catch (error) {
+      showInfoModal('❌ 导入失败', error instanceof Error ? error.message : '导入失败');
+    }
+  }
+
   async function handleSettingsSave(settings: {
     warningDays: string;
     notificationEnabled: string;
@@ -704,7 +715,9 @@ const App: React.FC = () => {
         notificationMethods={notificationMethods}
         bgImageUrl={bgImageUrl}
         carouselInterval={carouselInterval}
+        domains={domains}
         onSave={handleSettingsSave}
+        onImportDomains={handleImportDomains}
       />
     </div>
   );
