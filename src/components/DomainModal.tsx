@@ -28,6 +28,41 @@ const DomainModal: React.FC<DomainModalProps> = ({
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     const { id, value } = e.target;
+    
+    // 对日期输入框进行特殊处理，限制年份为4位数
+    if (id === 'register_date' || id === 'expire_date') {
+      // 检查日期格式，确保年份只有4位数
+      const dateRegex = /^\d{4}-\d{2}-\d{2}$/;
+      if (value && !dateRegex.test(value)) {
+        // 如果格式不正确，尝试修复
+        const parts = value.split('-');
+        if (parts.length === 3) {
+          const year = parts[0].slice(0, 4); // 只取前4位
+          const month = parts[1].slice(0, 2); // 只取前2位
+          const day = parts[2].slice(0, 2); // 只取前2位
+          
+          // 验证年份是否为4位数且在合理范围内
+          const yearNum = parseInt(year);
+          if (yearNum >= 1900 && yearNum <= 9999) {
+            const fixedValue = `${year}-${month}-${day}`;
+            if (dateRegex.test(fixedValue)) {
+              onChange(id, fixedValue);
+              return;
+            }
+          }
+        }
+        return; // 如果无法修复，则不更新
+      }
+      
+      // 额外验证：确保年份确实是4位数
+      if (value) {
+        const parts = value.split('-');
+        if (parts.length === 3 && parts[0].length !== 4) {
+          return; // 如果年份不是4位数，不更新
+        }
+      }
+    }
+    
     onChange(id, value);
   };
 
@@ -91,6 +126,8 @@ const DomainModal: React.FC<DomainModalProps> = ({
               value={domain.register_date} 
               onChange={handleChange} 
               required 
+              min="1900-01-01"
+              max="9999-12-31"
               style={{
                 background: 'rgba(40,40,40,0.35)',
                 color: '#fff',
@@ -115,6 +152,8 @@ const DomainModal: React.FC<DomainModalProps> = ({
               value={domain.expire_date} 
               onChange={handleChange} 
               required 
+              min="1900-01-01"
+              max="9999-12-31"
               style={{
                 background: 'rgba(40,40,40,0.35)',
                 color: '#fff',
