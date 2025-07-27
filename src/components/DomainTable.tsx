@@ -82,7 +82,7 @@ const DomainTable: React.FC<DomainTableProps> = ({
 
   const pagedDomains = (list: Domain[]) => list.slice((page - 1) * pageSize, page * pageSize);
   const paged = pagedDomains(filteredDomains());
-  const totalPages = Math.ceil(filteredDomains().length / pageSize);
+  const totalPages = Math.max(1, Math.ceil(filteredDomains().length / pageSize));
 
   const getSortClass = (field: string) => {
     if (sortField === field) return sortOrder === 'asc' ? 'sorted-asc' : 'sorted-desc';
