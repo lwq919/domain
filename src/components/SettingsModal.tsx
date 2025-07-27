@@ -7,6 +7,7 @@ import {
   importDomainsFromFile, 
   validateDomainData 
 } from '../utils';
+import LogsModal from './LogsModal';
 
 interface SettingsModalProps {
   isOpen: boolean;
@@ -78,6 +79,7 @@ const SettingsModal: React.FC<SettingsModalProps> = ({
   const [webdavError, setWebdavError] = useState<string>('');
   const [webdavSuccess, setWebdavSuccess] = useState<string>('');
   const [webdavLoading, setWebdavLoading] = useState(false);
+  const [logsModal, setLogsModal] = useState(false);
 
   // 注意：环境变量配置现在由后端API处理
   // 前端只需要提供手动配置选项
@@ -487,6 +489,25 @@ const SettingsModal: React.FC<SettingsModalProps> = ({
                 </div>
               )}
             </div>
+
+            {/* 系统日志 */}
+            <div className="settings-section">
+              <h3>📋 系统日志</h3>
+              
+              <div className="form-group">
+                <label className="form-label">日志管理：</label>
+                <div className="logs-buttons">
+                  <button
+                    type="button"
+                    className="btn btn-logs"
+                    onClick={() => setLogsModal(true)}
+                  >
+                    📋 查看系统日志
+                  </button>
+                </div>
+                <small className="form-hint">查看操作日志和通知日志，支持筛选和清理功能</small>
+              </div>
+            </div>
           </div>
 
           <div className="modal-footer settings-modal-footer">
@@ -506,6 +527,12 @@ const SettingsModal: React.FC<SettingsModalProps> = ({
             </button>
           </div>
         </form>
+
+        {/* 日志模态框 */}
+        <LogsModal
+          isOpen={logsModal}
+          onClose={() => setLogsModal(false)}
+        />
       </div>
     </div>
   );
