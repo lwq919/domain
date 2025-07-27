@@ -325,7 +325,7 @@ const LogsModal: React.FC<LogsModalProps> = ({ isOpen, onClose }) => {
         onConfirm={handleAlertClose}
         onCancel={handleAlertClose}
         confirmText="确定"
-        type="alert"
+        type={alertType === 'success' ? 'success' : 'alert'}
       />
     </div>
   );
