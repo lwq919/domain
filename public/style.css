@@ -23,121 +23,20 @@ body {
     margin-bottom: 40px;
     color: white;
     position: relative;
-    background: linear-gradient(135deg, rgba(255,255,255,0.3) 0%, rgba(255,255,255,0.15) 100%);
-    border-radius: 20px;
-    backdrop-filter: blur(15px);
-    -webkit-backdrop-filter: blur(15px);
-    box-shadow: 0 8px 32px rgba(0,0,0,0.12);
-    padding: 30px 20px 20px 20px;
-    border: 1px solid rgba(255, 255, 255, 0.2);
-    overflow: hidden;
-}
-
-.header::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    height: 2px;
-    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.6), transparent);
+    background: rgba(255,255,255,0.25);
+    border-radius: 16px;
+    backdrop-filter: blur(12px);
+    box-shadow: 0 4px 24px rgba(0,0,0,0.08);
+    padding: 24px 0 10px 0;
 }
 .header h1 {
-    font-size: 3.2rem;
-    margin-bottom: 15px;
-    font-weight: 800;
-    color: #fff;
-    letter-spacing: 2px;
-    position: relative;
-    z-index: 1;
-    text-shadow: 
-        0 0 10px rgba(255, 255, 255, 0.5),
-        0 0 20px rgba(255, 255, 255, 0.3),
-        0 0 30px rgba(255, 255, 255, 0.2),
-        0 4px 8px rgba(0, 0, 0, 0.3);
-    background: linear-gradient(135deg, #ffffff 0%, #f0f8ff 50%, #e6f3ff 100%);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
-    animation: titleGlow 3s ease-in-out infinite alternate;
-    position: relative;
-}
-
-.header h1::before {
-    content: '';
-    position: absolute;
-    top: -10px;
-    left: -20px;
-    right: -20px;
-    bottom: -10px;
-    background: linear-gradient(45deg, 
-        rgba(255, 255, 255, 0.1) 0%, 
-        rgba(255, 255, 255, 0.05) 50%, 
-        rgba(255, 255, 255, 0.1) 100%);
-    border-radius: 20px;
-    z-index: -1;
-    filter: blur(20px);
-    animation: titleBackground 4s ease-in-out infinite alternate;
-}
-
-@keyframes titleGlow {
-    0% {
-        filter: brightness(1) drop-shadow(0 0 5px rgba(255, 255, 255, 0.3));
-    }
-    100% {
-        filter: brightness(1.2) drop-shadow(0 0 15px rgba(255, 255, 255, 0.6));
-    }
-}
-
-@keyframes titleBackground {
-    0% {
-        opacity: 0.3;
-        transform: scale(1);
-    }
-    100% {
-        opacity: 0.6;
-        transform: scale(1.05);
-    }
+    font-size: 2.5rem;
+    margin-bottom: 10px;
+    text-shadow: 0 2px 4px rgba(0,0,0,0.3);
 }
 .header p {
-    font-size: 1.2rem;
-    opacity: 0.95;
-    margin: 0;
-    padding: 12px 30px;
-    background: linear-gradient(135deg, rgba(255, 255, 255, 0.15) 0%, rgba(255, 255, 255, 0.08) 100%);
-    border-radius: 25px;
-    border: 1px solid rgba(255, 255, 255, 0.2);
-    backdrop-filter: blur(8px);
-    -webkit-backdrop-filter: blur(8px);
-    box-shadow: 0 2px 12px rgba(0, 0, 0, 0.1);
-    display: inline-block;
-    font-weight: 400;
-    letter-spacing: 0.5px;
-    text-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
-    transition: all 0.3s ease;
-    position: relative;
-    overflow: hidden;
-}
-
-.header p::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: -100%;
-    width: 100%;
-    height: 100%;
-    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
-    transition: left 0.5s ease;
-}
-
-.header p:hover::before {
-    left: 100%;
-}
-
-.header p:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
-    background: linear-gradient(135deg, rgba(255, 255, 255, 0.2) 0%, rgba(255, 255, 255, 0.12) 100%);
+    font-size: 1.1rem;
+    opacity: 0.9;
 }
 .settings-btn {
     position: absolute;
@@ -464,16 +363,12 @@ td {
 }
 .loading {
     text-align: center;
-    padding: 60px 40px;
-    color: rgba(255, 255, 255, 0.8);
-    font-size: 1.1rem;
-    font-weight: 500;
-    background: rgba(255, 255, 255, 0.1);
-    border-radius: 12px;
-    margin: 20px 0;
-    backdrop-filter: blur(10px);
-    -webkit-backdrop-filter: blur(10px);
-    border: 1px solid rgba(255, 255, 255, 0.2);
+    padding: 40px;
+    color: #666;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 200px;
 }
 .settings-section {
     margin-bottom: 30px;
@@ -952,7 +847,6 @@ td {
     text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
     letter-spacing: 0.5px;
     position: relative;
-    padding-left: 0;
 }
 
 /* 表单元素美化 */
@@ -1579,32 +1473,8 @@ td {
     .container {
         padding: 10px;
     }
-    .header {
-        padding: 20px 15px 15px 15px;
-        border-radius: 16px;
-        margin-bottom: 30px;
-    }
-    
     .header h1 {
-        font-size: 2.4rem;
-        margin-bottom: 12px;
-        letter-spacing: 1px;
-        font-weight: 700;
-        text-shadow: 
-            0 0 8px rgba(255, 255, 255, 0.4),
-            0 0 16px rgba(255, 255, 255, 0.2),
-            0 2px 4px rgba(0, 0, 0, 0.3);
-    }
-    
-    .header h1::before {
-        display: none;
-    }
-    
-    .header p {
-        font-size: 0.95rem;
-        padding: 8px 16px;
-        border-radius: 18px;
-        letter-spacing: 0.3px;
+        font-size: 2rem;
     }
     .settings-btn {
         width: 40px;
@@ -1632,12 +1502,6 @@ td {
     .modal-content {
         width: 95%;
         padding: 20px;
-    }
-    
-    .loading {
-        padding: 40px 20px;
-        font-size: 1rem;
-        margin: 10px 0;
     }
 }
 .sortable {
