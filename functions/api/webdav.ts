@@ -1,5 +1,25 @@
 import { createErrorResponse, createSuccessResponse } from './common';
 
+// 记录操作日志的函数
+async function logOperation(env: any, action: string, details: string, status: 'success' | 'error' | 'warning' = 'success') {
+  try {
+    const userAgent = 'Server-Side'; // 服务器端操作
+    const ipAddress = '127.0.0.1'; // 本地操作
+    
+    await env.DB.prepare(
+      'INSERT INTO operation_logs (action, details, status, user_agent, ip_address) VALUES (?, ?, ?, ?, ?)'
+    ).bind(
+      action,
+      details,
+      status,
+      userAgent,
+      ipAddress
+    ).run();
+  } catch (error) {
+    console.error('记录操作日志失败:', error);
+  }
+}
+
 interface WebDAVConfig {
   url: string;
   username: string;
@@ -54,6 +74,7 @@ export const onRequest = async (context: any) => {
       console.log('WebDAV请求:', { action, hasWebDAVConfig: !!webdavConfig, filename });
 
       if (!action) {
+        await logOperation(env, 'WebDAV操作', '缺少操作类型', 'error');
         return createErrorResponse('缺少操作类型', 400);
       }
 
@@ -81,6 +102,7 @@ export const onRequest = async (context: any) => {
         });
         
         if (!envUrl || !envUser || !envPass) {
+          await logOperation(env, 'WebDAV操作', 'WebDAV配置不完整，请检查环境变量或手动输入配置', 'error');
           return createErrorResponse('WebDAV配置不完整，请检查环境变量或手动输入配置', 400);
         }
         
@@ -98,6 +120,7 @@ export const onRequest = async (context: any) => {
       } else if (action === 'restore') {
         return await handleRestore(env, config, filename);
       } else {
+        await logOperation(env, 'WebDAV操作', `不支持的操作: ${action}`, 'error');
         return createErrorResponse('不支持的操作', 400);
       }
     } catch (e: any) {
@@ -173,6 +196,9 @@ async function handleBackup(env: any, config: WebDAVConfig): Promise<Response> {
       throw new Error(`WebDAV上传失败: ${uploadResponse.status} ${uploadResponse.statusText}`);
     }
 
+    // 记录备份成功日志
+    await logOperation(env, 'WebDAV备份', `成功备份 ${domains?.length || 0} 个域名到 ${filename}`, 'success');
+
     return createSuccessResponse({
       success: true,
       message: '备份成功',
@@ -182,6 +208,8 @@ async function handleBackup(env: any, config: WebDAVConfig): Promise<Response> {
     });
   } catch (error: any) {
     console.error('WebDAV备份错误:', error);
+    // 记录备份失败日志
+    await logOperation(env, 'WebDAV备份', `备份失败: ${error.message}`, 'error');
     return createErrorResponse(`备份失败: ${error.message}`, 500);
   }
 }
@@ -255,6 +283,9 @@ async function handleRestore(env: any, config: WebDAVConfig, filename?: string):
       ).run();
     }
 
+    // 记录恢复成功日志
+    await logOperation(env, 'WebDAV恢复', `成功恢复 ${backupData.domains.length} 个域名，备份时间: ${toBeijingTime(backupData.timestamp)}`, 'success');
+
     return createSuccessResponse({
       success: true,
       message: '恢复成功',
@@ -263,6 +294,8 @@ async function handleRestore(env: any, config: WebDAVConfig, filename?: string):
     });
   } catch (error: any) {
     console.error('WebDAV恢复错误:', error);
+    // 记录恢复失败日志
+    await logOperation(env, 'WebDAV恢复', `恢复失败: ${error.message}`, 'error');
     return createErrorResponse(`恢复失败: ${error.message}`, 500);
   }
 }
