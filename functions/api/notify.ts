@@ -126,28 +126,44 @@ export const onRequest = async (context: any) => {
   }
       // 多方式通知分发
       if (body.domains) {
-        // 查询通知设置，决定分发方式
+        // 从环境变量获取通知配置
         let notifyMethods: string[] = [];
         let settings: any = {};
-        try {
-          const { results } = await env.DB.prepare(
-            'SELECT notification_method, email_config, telegram_bot_token, telegram_chat_id, wechat_send_key, qq_key, webhook_url FROM notification_settings LIMIT 1'
-          ).all();
-          if (results.length > 0) {
-            settings = results[0];
-            const val = results[0].notification_method;
-            if (Array.isArray(val)) {
-              notifyMethods = val;
-            } else if (typeof val === 'string') {
-              try {
-                notifyMethods = JSON.parse(val);
-              } catch (error) {
-                console.error('解析通知方法失败:', error);
-                notifyMethods = ['telegram']; // 默认使用telegram
+        
+        // 检查环境变量中配置的通知方式
+        const envMethods = [];
+        if (env.TG_BOT_TOKEN && env.TG_USER_ID) envMethods.push('telegram');
+        if (env.WECHAT_SENDKEY) envMethods.push('wechat');
+        if (env.QMSG_KEY && env.QMSG_QQ) envMethods.push('qq');
+        if (env.MAIL_TO) envMethods.push('email');
+        if (env.WEBHOOK_URL) envMethods.push('webhook');
+        
+        // 如果环境变量中有配置，优先使用环境变量
+        if (envMethods.length > 0) {
+          notifyMethods = envMethods;
+        } else {
+          // 否则从数据库获取配置
+          try {
+            const { results } = await env.DB.prepare(
+              'SELECT notification_method, email_config, telegram_bot_token, telegram_chat_id, wechat_send_key, qq_key, webhook_url FROM notification_settings LIMIT 1'
+            ).all();
+            if (results.length > 0) {
+              settings = results[0];
+              const val = results[0].notification_method;
+              if (Array.isArray(val)) {
+                notifyMethods = val;
+              } else if (typeof val === 'string') {
+                try {
+                  notifyMethods = JSON.parse(val);
+                } catch (error) {
+                  console.error('解析通知方法失败:', error);
+                  notifyMethods = ['telegram']; // 默认使用telegram
+                }
               }
             }
-          }
-        } catch {}
+          } catch {}
+        }
+        
         if (!Array.isArray(notifyMethods) || notifyMethods.length === 0) notifyMethods = ['telegram'];
         const expiringDomains = body.domains.filter((domain: Domain) => isExpiringSoon(domain.expire_date, 15));
         if (expiringDomains.length === 0) {
@@ -159,8 +175,8 @@ export const onRequest = async (context: any) => {
           try {
             if (method === 'telegram') {
               // Telegram 通知逻辑
-              const botToken = settings.telegram_bot_token || env.TG_BOT_TOKEN;
-              const chatId = settings.telegram_chat_id || env.TG_USER_ID;
+              const botToken = env.TG_BOT_TOKEN || settings.telegram_bot_token;
+              const chatId = env.TG_USER_ID || settings.telegram_chat_id;
               if (!botToken || !chatId) throw new Error('Telegram配置未设置');
               let message = '⚠️ <b>域名到期提醒</b>\n\n';
               message += `以下域名将在15天内到期：\n\n`;
@@ -180,7 +196,7 @@ export const onRequest = async (context: any) => {
               if (!telegramResponse.ok) throw new Error('Telegram API请求失败');
               results.push({ method: 'telegram', ok: true });
             } else if (method === 'wechat') {
-              const sendKey = settings.wechat_send_key || env.WECHAT_SENDKEY;
+              const sendKey = env.WECHAT_SENDKEY || settings.wechat_send_key;
               if (!sendKey) throw new Error('未配置微信SendKey');
               let content = '以下域名将在15天内到期：\n\n';
               expiringDomains.forEach((domain: Domain) => {
@@ -191,8 +207,8 @@ export const onRequest = async (context: any) => {
               await sendWeChatNotify('域名到期提醒', content, sendKey);
               results.push({ method: 'wechat', ok: true });
             } else if (method === 'qq') {
-              const key = settings.qq_key || env.QMSG_KEY;
-              const qq = env.QMSG_QQ; // QQ号暂时还是从环境变量获取
+              const key = env.QMSG_KEY || settings.qq_key;
+              const qq = env.QMSG_QQ;
               if (!key || !qq) throw new Error('未配置Qmsg酱 key 或 QQ号');
               let content = '以下域名将在15天内到期：\n\n';
               expiringDomains.forEach((domain: Domain) => {
@@ -203,7 +219,7 @@ export const onRequest = async (context: any) => {
               await sendQQNotify(content, key, qq);
               results.push({ method: 'qq', ok: true });
             } else if (method === 'email') {
-              const mailTo = settings.email_config || env.MAIL_TO;
+              const mailTo = env.MAIL_TO || settings.email_config;
               if (!mailTo) throw new Error('未配置收件人邮箱');
               let content = '以下域名将在15天内到期：\n\n';
               expiringDomains.forEach((domain: Domain) => {
@@ -214,7 +230,7 @@ export const onRequest = async (context: any) => {
               await sendMailNotify('域名到期提醒', content, mailTo);
               results.push({ method: 'email', ok: true });
             } else if (method === 'webhook') {
-              const webhookUrl = settings.webhook_url;
+              const webhookUrl = env.WEBHOOK_URL || settings.webhook_url;
               if (!webhookUrl) throw new Error('未配置Webhook URL');
               const webhookData = {
                 title: '域名到期提醒',
