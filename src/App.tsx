@@ -71,7 +71,17 @@ const App: React.FC = () => {
   const [warningDays, setWarningDays] = useState(() => localStorage.getItem('notificationWarningDays') || '15');
   const [notificationEnabled, setNotificationEnabled] = useState(() => localStorage.getItem('notificationEnabled') || 'true');
   const [notificationInterval, setNotificationInterval] = useState(() => localStorage.getItem('notificationInterval') || 'daily');
-  const [notificationMethods, setNotificationMethods] = useState<NotificationMethod[]>([]);
+  const [notificationMethods, setNotificationMethods] = useState<NotificationMethod[]>(() => {
+    const saved = localStorage.getItem('notificationMethods');
+    if (saved) {
+      try {
+        return JSON.parse(saved);
+      } catch {
+        return [];
+      }
+    }
+    return [];
+  });
   const [dontRemindToday, setDontRemindToday] = useState(() => {
     const dontRemindDate = localStorage.getItem('dontRemindToday');
     return dontRemindDate === getTodayString();
@@ -215,10 +225,24 @@ const App: React.FC = () => {
         setNotificationEnabled(data.settings.notificationEnabled);
         setNotificationInterval(data.settings.notificationInterval);
         let methods = data.settings.notificationMethods;
-        if (Array.isArray(methods)) setNotificationMethods(methods);
+        if (Array.isArray(methods)) {
+          setNotificationMethods(methods);
+          // 同时保存到本地存储
+          localStorage.setItem('notificationMethods', JSON.stringify(methods));
+        }
         else if (typeof methods === 'string') {
-          try { setNotificationMethods(JSON.parse(methods)); } catch { setNotificationMethods([]); }
-        } else setNotificationMethods([]);
+          try { 
+            const parsedMethods = JSON.parse(methods);
+            setNotificationMethods(parsedMethods);
+            localStorage.setItem('notificationMethods', methods);
+          } catch { 
+            setNotificationMethods([]);
+            localStorage.setItem('notificationMethods', JSON.stringify([]));
+          }
+        } else {
+          setNotificationMethods([]);
+          localStorage.setItem('notificationMethods', JSON.stringify([]));
+        }
       }
     } catch (error: any) {
       console.error('加载通知设置失败:', error);
@@ -555,6 +579,7 @@ const App: React.FC = () => {
       localStorage.setItem('notificationWarningDays', settings.warningDays);
       localStorage.setItem('notificationEnabled', settings.notificationEnabled);
       localStorage.setItem('notificationInterval', settings.notificationInterval);
+      localStorage.setItem('notificationMethods', JSON.stringify(settings.notificationMethods));
       localStorage.setItem('customBgImageUrl', settings.bgImageUrl);
       localStorage.setItem('carouselInterval', settings.carouselInterval.toString());
 
