@@ -12,7 +12,13 @@ export interface NotificationSettings {
   warningDays: string;
   notificationEnabled: string;
   notificationInterval: string;
-  notificationMethod: string;
+  notificationMethods: string[];
+  emailConfig?: string;
+  telegramBotToken?: string;
+  telegramChatId?: string;
+  wechatSendKey?: string;
+  qqKey?: string;
+  webhookUrl?: string;
 }
 
 export interface NotificationSettingsResponse {
@@ -35,13 +41,19 @@ export interface NotificationSettingsRequest {
   warningDays: string;
   notificationEnabled: string;
   notificationInterval: string;
-  notificationMethod: string;
+  notificationMethods: string[];
+  emailConfig?: string;
+  telegramBotToken?: string;
+  telegramChatId?: string;
+  wechatSendKey?: string;
+  qqKey?: string;
+  webhookUrl?: string;
 }
 
 export type SortOrder = 'asc' | 'desc';
 export type FilterStatus = 'all' | 'active' | 'expired' | 'pending';
 export type ExportFormat = 'csv' | 'json' | 'txt';
-export type NotificationMethod = 'wechat' | 'qq' | 'email' | 'telegram';
+export type NotificationMethod = 'email' | 'telegram' | 'wechat' | 'qq' | 'webhook';
 
 export const STATUS_LABELS: Record<string, string> = {
   active: '正常',
