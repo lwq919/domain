@@ -994,7 +994,7 @@ td {
 
 /* 日志模态框样式 */
 .logs-modal-overlay {
-  background: rgba(0, 0, 0, 0.2);
+  background: rgba(0, 0, 0, 0.1);
   z-index: 99999;
   position: fixed;
   top: 0;
@@ -1011,7 +1011,7 @@ td {
   width: 100%;
   height: 100vh;
   max-width: none;
-  background: linear-gradient(135deg, rgba(255, 255, 255, 0.6) 0%, rgba(255, 255, 255, 0.5) 100%);
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.75) 0%, rgba(255, 255, 255, 0.65) 100%);
   backdrop-filter: blur(20px);
   -webkit-backdrop-filter: blur(20px);
   border: none;
@@ -1024,9 +1024,9 @@ td {
 }
 
 .logs-modal-header {
-  background: rgba(255, 255, 255, 0.35);
+  background: rgba(255, 255, 255, 0.45);
   padding: 28px 40px;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.4);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.5);
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -1045,8 +1045,8 @@ td {
 }
 
 .logs-modal-close {
-  background: rgba(255, 255, 255, 0.35);
-  border: 1px solid rgba(255, 255, 255, 0.4);
+  background: rgba(255, 255, 255, 0.45);
+  border: 1px solid rgba(255, 255, 255, 0.5);
   color: #fff;
   font-size: 1.4rem;
   cursor: pointer;
@@ -1063,10 +1063,10 @@ td {
 }
 
 .logs-modal-close:hover {
-  background: rgba(255, 255, 255, 0.45);
-  border-color: rgba(255, 255, 255, 0.5);
+  background: rgba(255, 255, 255, 0.55);
+  border-color: rgba(255, 255, 255, 0.6);
   transform: scale(1.1);
-  box-shadow: 0 4px 20px rgba(255, 255, 255, 0.4);
+  box-shadow: 0 4px 20px rgba(255, 255, 255, 0.5);
 }
 
 .logs-modal-body {
@@ -1075,7 +1075,7 @@ td {
   overflow-y: auto;
   display: flex;
   flex-direction: column;
-  background: rgba(255, 255, 255, 0.2);
+  background: rgba(255, 255, 255, 0.3);
 }
 
 /* 日志控制栏 */
@@ -1085,8 +1085,8 @@ td {
   align-items: center;
   margin-bottom: 32px;
   padding: 20px 24px;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.3);
-  background: rgba(255, 255, 255, 0.25);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.4);
+  background: rgba(255, 255, 255, 0.35);
   border-radius: 12px;
   flex-shrink: 0;
 }
@@ -1205,16 +1205,16 @@ td {
 }
 
 .log-item {
-  background: rgba(255, 255, 255, 0.4);
-  border: 1px solid rgba(255, 255, 255, 0.5);
+  background: rgba(255, 255, 255, 0.5);
+  border: 1px solid rgba(255, 255, 255, 0.6);
   border-radius: 12px;
   padding: 16px;
   transition: all 0.3s ease;
 }
 
 .log-item:hover {
-  background: rgba(255, 255, 255, 0.5);
-  border-color: rgba(255, 255, 255, 0.6);
+  background: rgba(255, 255, 255, 0.6);
+  border-color: rgba(255, 255, 255, 0.7);
   transform: translateY(-2px);
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
 }
@@ -1293,7 +1293,7 @@ td {
 
 .log-ip {
   font-family: monospace;
-  background: rgba(255, 255, 255, 0.2);
+  background: rgba(255, 255, 255, 0.3);
   padding: 2px 6px;
   border-radius: 4px;
 }
@@ -1803,10 +1803,10 @@ td {
 }
 
 .confirm-modal-content {
-  background: linear-gradient(135deg, rgba(255, 255, 255, 0.25) 0%, rgba(255, 255, 255, 0.15) 100%);
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.4) 0%, rgba(255, 255, 255, 0.3) 100%);
   backdrop-filter: blur(20px);
   -webkit-backdrop-filter: blur(20px);
-  border: 1px solid rgba(255, 255, 255, 0.3);
+  border: 1px solid rgba(255, 255, 255, 0.4);
   border-radius: 20px;
   max-width: 500px;
   width: 100%;
@@ -1815,9 +1815,9 @@ td {
 }
 
 .confirm-modal-header {
-  background: rgba(255, 255, 255, 0.1);
+  background: rgba(255, 255, 255, 0.2);
   padding: 20px 24px;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.2);
   display: flex;
   justify-content: space-between;
   align-items: center;
