@@ -32,6 +32,7 @@ import ExpireModal from './components/ExpireModal';
 import InfoModal from './components/InfoModal';
 import PasswordModal from './components/PasswordModal';
 import SettingsModal from './components/SettingsModal';
+import LogsModal from './components/LogsModal';
 
 const App: React.FC = () => {
   // 状态管理
@@ -62,6 +63,7 @@ const App: React.FC = () => {
   const [infoMessage, setInfoMessage] = useState('');
   const [infoTitle, setInfoTitle] = useState('');
   const [settingsModal, setSettingsModal] = useState(false);
+  const [logsModal, setLogsModal] = useState(false);
 
   // 通知相关状态
   const [warningDays, setWarningDays] = useState(() => localStorage.getItem('notificationWarningDays') || '15');
@@ -750,8 +752,13 @@ const App: React.FC = () => {
         onImportDomains={handleImportDomains}
         onWebDAVBackup={handleWebDAVBackup}
         onWebDAVRestore={handleWebDAVRestore}
+        onOpenLogs={() => setLogsModal(true)}
       />
 
+      <LogsModal
+        isOpen={logsModal}
+        onClose={() => setLogsModal(false)}
+      />
 
     </div>
   );
