@@ -224,10 +224,25 @@ const App: React.FC = () => {
         setWarningDays(data.settings.warningDays);
         setNotificationEnabled(data.settings.notificationEnabled);
         setNotificationInterval(data.settings.notificationInterval);
+        
+        // 优先使用本地存储的通知方式，如果本地没有则使用服务器设置
+        const localMethods = localStorage.getItem('notificationMethods');
+        if (localMethods) {
+          try {
+            const parsedLocalMethods = JSON.parse(localMethods);
+            if (Array.isArray(parsedLocalMethods) && parsedLocalMethods.length > 0) {
+              setNotificationMethods(parsedLocalMethods);
+              return; // 使用本地存储的设置，不覆盖
+            }
+          } catch {
+            // 本地存储解析失败，继续使用服务器设置
+          }
+        }
+        
+        // 如果本地存储没有有效的通知方式，则使用服务器设置
         let methods = data.settings.notificationMethods;
         if (Array.isArray(methods)) {
           setNotificationMethods(methods);
-          // 同时保存到本地存储
           localStorage.setItem('notificationMethods', JSON.stringify(methods));
         }
         else if (typeof methods === 'string') {
