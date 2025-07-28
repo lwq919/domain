@@ -73,11 +73,37 @@ export async function deleteDomain(domain: string): Promise<void> {
 }
 
 export async function notifyExpiring(domains: Domain[]): Promise<void> {
-  await fetch('/api/notify', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ domains })
-  });
+  console.log('开始发送到期通知，域名数量:', domains.length);
+  console.log('域名列表:', domains.map(d => `${d.domain}(${d.expire_date})`));
+  
+  try {
+    const response = await fetch('/api/notify', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ domains })
+    });
+    
+    console.log('通知API响应状态:', response.status, response.statusText);
+    
+    if (!response.ok) {
+      const errorText = await response.text();
+      console.error('通知API请求失败:', response.status, response.statusText, errorText);
+      throw new Error(`通知发送失败: ${response.status} ${response.statusText}`);
+    }
+    
+    const responseData = await response.json();
+    console.log('通知API响应数据:', responseData);
+    
+    if (!responseData.success) {
+      console.error('通知发送失败:', responseData.error);
+      throw new Error(responseData.error || '通知发送失败');
+    }
+    
+    console.log('通知发送成功:', responseData);
+  } catch (error) {
+    console.error('发送通知时发生错误:', error);
+    throw error;
+  }
 }
 
 export async function fetchNotificationSettingsFromServer(): Promise<NotificationSettingsResponse> {
