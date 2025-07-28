@@ -1,6 +1,6 @@
 export interface LogEntry {
   id?: number;
-  type: 'operation' | 'notification' | 'access';
+  type: 'operation' | 'notification' | 'access' | 'system';
   action: string;
   details: string;
   status: 'success' | 'error' | 'warning';
@@ -56,9 +56,15 @@ export const onRequest = async (context: any) => {
       } else if (type === 'access') {
         query = 'SELECT * FROM access_logs ORDER BY timestamp DESC LIMIT ? OFFSET ?';
         params = [limit, offset];
+      } else if (type === 'system') {
+        query = 'SELECT * FROM system_logs ORDER BY timestamp DESC LIMIT ? OFFSET ?';
+        params = [limit, offset];
       } else {
-        // 获取所有日志，先操作日志再通知日志再访问日志
+        // 获取所有日志，先系统日志再操作日志再通知日志再访问日志
         query = `
+          SELECT 'system' as log_type, id, action, details, status, timestamp, user_agent, ip_address, NULL as domain, NULL as notification_method, NULL as message, NULL as error_details, NULL as device_info
+          FROM system_logs
+          UNION ALL
           SELECT 'operation' as log_type, id, action, details, status, timestamp, user_agent, ip_address, NULL as domain, NULL as notification_method, NULL as message, NULL as error_details, NULL as device_info
           FROM operation_logs
           UNION ALL
@@ -143,6 +149,23 @@ export const onRequest = async (context: any) => {
           ipAddress,
           device_info || null
         ).run();
+      } else if (type === 'system') {
+        // 记录系统日志
+        const userAgent = request.headers.get('user-agent') || '';
+        const ipAddress = request.headers.get('cf-connecting-ip') || 
+                         request.headers.get('x-forwarded-for') || 
+                         request.headers.get('x-real-ip') || '';
+
+        await env.DB.prepare(
+          'INSERT INTO system_logs (action, details, status, user_agent, ip_address, device_info) VALUES (?, ?, ?, ?, ?, ?)'
+        ).bind(
+          action,
+          details,
+          status,
+          userAgent,
+          ipAddress,
+          device_info || null
+        ).run();
       }
 
       return new Response(JSON.stringify({ success: true, message: '日志记录成功' }), {
@@ -167,11 +190,14 @@ export const onRequest = async (context: any) => {
         await env.DB.prepare('DELETE FROM notification_logs').run();
       } else if (type === 'access') {
         await env.DB.prepare('DELETE FROM access_logs').run();
+      } else if (type === 'system') {
+        await env.DB.prepare('DELETE FROM system_logs').run();
       } else {
         // 清理所有日志
         await env.DB.prepare('DELETE FROM operation_logs').run();
         await env.DB.prepare('DELETE FROM notification_logs').run();
         await env.DB.prepare('DELETE FROM access_logs').run();
+        await env.DB.prepare('DELETE FROM system_logs').run();
       }
 
       return new Response(JSON.stringify({ success: true, message: '日志清理成功' }), {
