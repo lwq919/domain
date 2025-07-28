@@ -386,7 +386,7 @@ const App: React.FC = () => {
         }
         
         // 先记录找到到期域名的日志
-        logSystem(
+        await logSystem(
           'expiring_domains_found',
           `找到 ${expiring.length} 个即将到期的域名，警告天数: ${localWarningDays}天`,
           'warning',
@@ -403,7 +403,7 @@ const App: React.FC = () => {
             setNotificationSentToday(true);
             
             // 记录通知发送成功
-            logSystem(
+            await logSystem(
               'notification_sent',
               `成功发送到期通知，涉及 ${expiring.length} 个域名`,
               'success',
@@ -415,7 +415,7 @@ const App: React.FC = () => {
             console.error('发送通知失败:', error);
             
             // 记录通知发送失败
-            logSystem(
+            await logSystem(
               'notification_failed',
               `发送到期通知失败: ${error instanceof Error ? error.message : '未知错误'}`,
               'error',
@@ -426,7 +426,7 @@ const App: React.FC = () => {
           }
         } else {
           // 记录今日已发送过通知
-          logSystem(
+          await logSystem(
             'notification_already_sent',
             '今日已发送过到期通知，跳过重复发送',
             'success',
