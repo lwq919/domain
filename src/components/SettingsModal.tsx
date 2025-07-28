@@ -431,8 +431,8 @@ const SettingsModal: React.FC<SettingsModalProps> = ({
                   >
                     📂 选择文件
                   </button>
-                  <span className="import-hint">支持JSON、CSV、TXT格式，导入的数据将替换当前所有域名数据</span>
                 </div>
+                <small className="form-hint">支持JSON、CSV、TXT格式，导入的数据将替换当前所有域名数据</small>
               </div>
 
               {/* 导入结果提示 */}
@@ -482,7 +482,7 @@ const SettingsModal: React.FC<SettingsModalProps> = ({
                     {webdavLoading ? '🔄 恢复中...' : '📥 从WebDAV恢复'}
                   </button>
                 </div>
-                <small className="form-hint">使用Cloudflare Pages环境变量中的WebDAV配置进行备份和恢复</small>
+                <small className="form-hint">请在CloudflarePages中添加WebDAV环境变量</small>
               </div>
 
               {/* WebDAV操作结果提示 */}
@@ -550,7 +550,7 @@ const SettingsModal: React.FC<SettingsModalProps> = ({
                 📋 查看系统日志
               </button>
             </div>
-            <small className="form-hint">查看操作日志和通知日志，支持筛选和清理功能</small>
+            <small className="form-hint">查看操作历史日志</small>
           </div>
         </div>
 
@@ -558,7 +558,7 @@ const SettingsModal: React.FC<SettingsModalProps> = ({
         <PasswordModal
           isOpen={passwordModal}
           title="🔐 管理员验证"
-          message="查看系统日志需要管理员权限，请输入管理员密码："
+          message="请输入管理员密码："
           onConfirm={handleLogsPasswordConfirm}
           onCancel={handleLogsPasswordCancel}
           confirmText="验证并查看"
