@@ -7,8 +7,9 @@ async function logOperation(env: any, action: string, details: string, status: '
     const ipAddress = '127.0.0.1';
     
     await env.DB.prepare(
-      'INSERT INTO operation_logs (action, details, status, user_agent, ip_address) VALUES (?, ?, ?, ?, ?)'
+      'INSERT INTO logs (type, action, details, status, user_agent, ip_address) VALUES (?, ?, ?, ?, ?, ?)'
     ).bind(
+      'operation',
       action,
       details,
       status,
