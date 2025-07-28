@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo, useCallback } from 'react';
 import { Domain, SortOrder, STATUS_LABELS } from '../types';
 import { calculateProgress, getProgressClass, getDaysLeft, getDaysColor, copyToClipboard, isMobile, getDynamicStatus } from '../utils';
 
@@ -27,7 +27,7 @@ interface DomainTableProps {
   onSearchChange: (search: string) => void;
 }
 
-const DomainTable: React.FC<DomainTableProps> = ({
+const DomainTable: React.FC<DomainTableProps> = React.memo(({
   domains,
   loading,
   search,
@@ -53,7 +53,8 @@ const DomainTable: React.FC<DomainTableProps> = ({
 }) => {
   const [scrollTop, setScrollTop] = useState(0);
 
-  const filteredDomains = (): Domain[] => {
+  // 使用 useMemo 优化过滤和排序逻辑
+  const filteredDomains = useMemo((): Domain[] => {
     let list = domains.filter((domain: Domain) =>
       domain.domain.toLowerCase().includes(search.toLowerCase()) ||
       domain.registrar.toLowerCase().includes(search.toLowerCase()) ||
@@ -80,25 +81,35 @@ const DomainTable: React.FC<DomainTableProps> = ({
       list = [...list].sort((a: Domain, b: Domain) => new Date(a.expire_date).getTime() - new Date(b.expire_date).getTime());
     }
     return list;
-  };
+  }, [domains, search, sortField, sortOrder]);
 
-  const pagedDomains = (list: Domain[]) => list.slice((page - 1) * pageSize, page * pageSize);
-  const paged = pagedDomains(filteredDomains());
-  const totalPages = Math.max(1, Math.ceil(filteredDomains().length / pageSize));
+  // 使用 useMemo 优化分页逻辑
+  const { paged, totalPages } = useMemo(() => {
+    const pagedDomains = (list: Domain[]) => list.slice((page - 1) * pageSize, page * pageSize);
+    const paged = pagedDomains(filteredDomains);
+    const totalPages = Math.max(1, Math.ceil(filteredDomains.length / pageSize));
+    return { paged, totalPages };
+  }, [filteredDomains, page, pageSize]);
 
-  const getSortClass = (field: string) => {
+  // 使用 useCallback 优化事件处理函数
+  const getSortClass = useCallback((field: string) => {
     if (sortField === field) return sortOrder === 'asc' ? 'sorted-asc' : 'sorted-desc';
     return '';
-  };
+  }, [sortField, sortOrder]);
 
-  const handleTableScroll = (e: React.UIEvent<HTMLDivElement>) => {
+  const handleTableScroll = useCallback((e: React.UIEvent<HTMLDivElement>) => {
     setScrollTop(e.currentTarget.scrollTop);
-  };
+  }, []);
 
-  const handleCopyDomain = async (domain: string) => {
+  const handleCopyDomain = useCallback(async (domain: string) => {
     await copyToClipboard(domain);
     onCopy(domain);
-  };
+  }, [onCopy]);
+
+  // 使用 useMemo 优化渲染的计算值
+  const selectedCount = useMemo(() => selectedIndexes.length, [selectedIndexes]);
+  const isAllSelected = useMemo(() => paged.length > 0 && selectedIndexes.length === paged.length, [paged.length, selectedIndexes.length]);
+  const isIndeterminate = useMemo(() => selectedIndexes.length > 0 && selectedIndexes.length < paged.length, [selectedIndexes.length, paged.length]);
 
   return (
     <div className="domain-table" style={{ width: '100%', minWidth: 0, margin: '0 auto', overflowX: 'visible', maxWidth: 1300 }}>
@@ -297,6 +308,6 @@ const DomainTable: React.FC<DomainTableProps> = ({
       )}
     </div>
   );
-};
+});
 
 export default DomainTable; 
