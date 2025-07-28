@@ -27,7 +27,7 @@ interface DomainTableProps {
   onSearchChange: (search: string) => void;
 }
 
-const DomainTable: React.FC<DomainTableProps> = React.memo(({
+const DomainTable: React.FC<DomainTableProps> = ({
   domains,
   loading,
   search,
