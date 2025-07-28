@@ -3,12 +3,13 @@ import { createErrorResponse, createSuccessResponse } from './common';
 // 记录操作日志的函数
 async function logOperation(env: any, action: string, details: string, status: 'success' | 'error' | 'warning' = 'success') {
   try {
-    const userAgent = 'Server-Side'; // 服务器端操作
-    const ipAddress = '127.0.0.1'; // 本地操作
+    const userAgent = 'Server-Side';
+    const ipAddress = '127.0.0.1';
     
     await env.DB.prepare(
-      'INSERT INTO operation_logs (action, details, status, user_agent, ip_address) VALUES (?, ?, ?, ?, ?)'
+      'INSERT INTO logs (type, action, details, status, user_agent, ip_address) VALUES (?, ?, ?, ?, ?, ?)'
     ).bind(
+      'operation',
       action,
       details,
       status,
@@ -69,51 +70,38 @@ export const onRequest = async (context: any) => {
   if (method === 'POST') {
     try {
       const body = await request.json();
-      const { action, webdavConfig, filename } = body;
+      const { action, filename } = body;
 
-      console.log('WebDAV请求:', { action, hasWebDAVConfig: !!webdavConfig, filename });
+      console.log('WebDAV请求:', { action, filename });
 
       if (!action) {
         await logOperation(env, 'WebDAV操作', '缺少操作类型', 'error');
         return createErrorResponse('缺少操作类型', 400);
       }
 
-      // 优先使用传入的配置，如果没有则使用环境变量
-      let config: WebDAVConfig;
+      // 从环境变量获取WebDAV配置
+      const envUrl = env.WEBDAV_URL;
+      const envUser = env.WEBDAV_USER;
+      const envPass = env.WEBDAV_PASS;
       
-      if (webdavConfig && webdavConfig.url && webdavConfig.username && webdavConfig.password) {
-        config = {
-          url: webdavConfig.url,
-          username: webdavConfig.username,
-          password: webdavConfig.password,
-          path: webdavConfig.path || '/domain/domains.json'
-        };
-        console.log('使用传入的WebDAV配置');
-      } else {
-        // 从环境变量获取配置
-        const envUrl = env.WEBDAV_URL;
-        const envUser = env.WEBDAV_USER;
-        const envPass = env.WEBDAV_PASS;
-        
-        console.log('环境变量检查:', { 
-          hasUrl: !!envUrl, 
-          hasUser: !!envUser, 
-          hasPass: !!envPass 
-        });
-        
-        if (!envUrl || !envUser || !envPass) {
-          await logOperation(env, 'WebDAV操作', 'WebDAV配置不完整，请检查环境变量或手动输入配置', 'error');
-          return createErrorResponse('WebDAV配置不完整，请检查环境变量或手动输入配置', 400);
-        }
-        
-        config = {
-          url: envUrl,
-          username: envUser,
-          password: envPass,
-          path: '/domain/domains.json'
-        };
-        console.log('使用环境变量WebDAV配置');
+      console.log('环境变量检查:', { 
+        hasUrl: !!envUrl, 
+        hasUser: !!envUser, 
+        hasPass: !!envPass 
+      });
+      
+      if (!envUrl || !envUser || !envPass) {
+        await logOperation(env, 'WebDAV操作', 'WebDAV配置不完整，请在Cloudflare Pages环境变量中设置', 'error');
+        return createErrorResponse('WebDAV配置不完整，请在Cloudflare Pages环境变量中设置', 400);
       }
+      
+      const config: WebDAVConfig = {
+        url: envUrl,
+        username: envUser,
+        password: envPass,
+        path: '/domain/domains.json'
+      };
+      console.log('使用环境变量WebDAV配置');
 
       if (action === 'backup') {
         return await handleBackup(env, config);
@@ -140,13 +128,13 @@ async function handleBackup(env: any, config: WebDAVConfig): Promise<Response> {
 
     // 获取通知设置
     const { results: settings } = await env.DB.prepare(
-      'SELECT warning_days as warningDays, notification_enabled as notificationEnabled, notification_interval as notificationInterval, notification_method as notificationMethod, email_config as emailConfig, telegram_bot_token as telegramBotToken, telegram_chat_id as telegramChatId, wechat_send_key as wechatSendKey, qq_key as qqKey, webhook_url as webhookUrl FROM notification_settings LIMIT 1'
+      'SELECT warning_days as warningDays, notification_enabled as notificationEnabled, notification_interval as notificationInterval, notification_method as notificationMethod FROM notification_settings LIMIT 1'
     ).all();
 
     const backupData: BackupData = {
       domains: domains || [],
       settings: settings?.[0] || {},
-      timestamp: new Date().toISOString(), // 保存UTC时间到备份文件
+      timestamp: new Date().toISOString(),
       version: '1.0.0'
     };
 
@@ -268,18 +256,12 @@ async function handleRestore(env: any, config: WebDAVConfig, filename?: string):
     if (backupData.settings && Object.keys(backupData.settings).length > 0) {
       await env.DB.exec('DELETE FROM notification_settings');
       await env.DB.prepare(
-        'INSERT INTO notification_settings (warning_days, notification_enabled, notification_interval, notification_method, email_config, telegram_bot_token, telegram_chat_id, wechat_send_key, qq_key, webhook_url) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)'
+        'INSERT INTO notification_settings (warning_days, notification_enabled, notification_interval, notification_method) VALUES (?, ?, ?, ?)'
       ).bind(
         backupData.settings.warningDays || '15',
         backupData.settings.notificationEnabled || 'true',
         backupData.settings.notificationInterval || 'daily',
-        backupData.settings.notificationMethod || '[]',
-        backupData.settings.emailConfig || null,
-        backupData.settings.telegramBotToken || null,
-        backupData.settings.telegramChatId || null,
-        backupData.settings.wechatSendKey || null,
-        backupData.settings.qqKey || null,
-        backupData.settings.webhookUrl || null
+        backupData.settings.notificationMethod || '[]'
       ).run();
     }
 
