@@ -1,15 +1,16 @@
 import React from 'react';
 import { Domain } from '../types';
-import { calculateProgress } from '../utils';
+import { calculateProgress, getDynamicStatus } from '../utils';
 
 interface StatsGridProps {
   domains: Domain[];
+  warningDays: number;
 }
 
-const StatsGrid: React.FC<StatsGridProps> = ({ domains }) => {
+const StatsGrid: React.FC<StatsGridProps> = ({ domains, warningDays }) => {
   const total = domains.length;
-  const active = domains.filter((d: Domain) => d.status === 'active').length;
-  const expired = domains.filter((d: Domain) => d.status === 'expired').length;
+  const active = domains.filter((d: Domain) => getDynamicStatus(d.expire_date, warningDays) === 'active').length;
+  const expired = domains.filter((d: Domain) => getDynamicStatus(d.expire_date, warningDays) === 'expired').length;
   const avgProgress = total ? Math.round(domains.reduce((sum: number, d: Domain) => sum + calculateProgress(d.register_date, d.expire_date), 0) / total) : 0;
 
   return (
