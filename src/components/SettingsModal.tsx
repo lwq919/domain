@@ -482,7 +482,7 @@ const SettingsModal: React.FC<SettingsModalProps> = ({
                     {webdavLoading ? '🔄 恢复中...' : '📥 从WebDAV恢复'}
                   </button>
                 </div>
-                <small className="form-hint">请在CloudflarePages中添加WebDAV环境变量</small>
+                <small className="form-hint">请在Cloudflare Pages中添加WebDAV环境变量</small>
               </div>
 
               {/* WebDAV操作结果提示 */}
