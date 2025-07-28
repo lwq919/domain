@@ -15,7 +15,6 @@
     
     <!-- 预加载关键资源 -->
     <link rel="preload" href="/style.css" as="style" />
-    <link rel="preload" href="/src/main.tsx" as="script" />
     
     <!-- DNS预解析 -->
     <link rel="dns-prefetch" href="//api.cloudflare.com" />
@@ -68,7 +67,12 @@
       if ('performance' in window) {
         window.addEventListener('load', () => {
           const perfData = performance.getEntriesByType('navigation')[0];
-          console.log('页面加载时间:', perfData.loadEventEnd - perfData.loadEventStart, 'ms');
+          if (perfData && perfData.loadEventEnd && perfData.loadEventStart) {
+            const loadTime = perfData.loadEventEnd - perfData.loadEventStart;
+            if (loadTime >= 0) {
+              console.log('页面加载时间:', loadTime.toFixed(2), 'ms');
+            }
+          }
         });
       }
       
