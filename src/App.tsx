@@ -90,6 +90,7 @@ const App: React.FC = () => {
     const lastNotificationDate = localStorage.getItem('lastNotificationDate');
     return lastNotificationDate === getTodayString();
   });
+  const [isCheckingExpiring, setIsCheckingExpiring] = useState(false);
 
   // 背景图片相关状态
   const [bgImageUrl, setBgImageUrl] = useState(() => localStorage.getItem('customBgImageUrl') || '');
@@ -190,12 +191,12 @@ const App: React.FC = () => {
 
   // 检查到期域名
   useEffect(() => {
-    if (!dontRemindToday && domains.length > 0) {
+    if (!dontRemindToday && domains.length > 0 && !isCheckingExpiring) {
       checkExpiringDomains(domains).catch(error => {
         console.error('检查到期域名时出错:', error);
       });
     }
-  }, [dontRemindToday, domains]);
+  }, [dontRemindToday, domains.length, isCheckingExpiring]); // 添加 isCheckingExpiring 依赖
 
   // 数据加载函数
   async function loadDomains() {
@@ -203,11 +204,7 @@ const App: React.FC = () => {
     try {
       const data = await fetchDomains();
       setDomains(data);
-      if (!dontRemindToday) {
-        checkExpiringDomains(data).catch(error => {
-          console.error('检查到期域名时出错:', error);
-        });
-      }
+      // 移除这里的重复检查，让 useEffect 来处理
     } catch (error: any) {
       const errorMessage = error.message || '加载域名失败';
       setOpMsg(`加载失败: ${errorMessage}`);
@@ -280,6 +277,9 @@ const App: React.FC = () => {
   // 到期域名检查
   async function checkExpiringDomains(domains: Domain[]) {
     if (dontRemindToday) return;
+    if (isCheckingExpiring) return; // 防止重复检查
+    
+    setIsCheckingExpiring(true);
     
     try {
       // 检查本地通知设置
@@ -345,6 +345,8 @@ const App: React.FC = () => {
     } catch (error: any) {
       console.error('检查到期域名时出错:', error);
       // 静默失败，不影响主要功能
+    } finally {
+      setIsCheckingExpiring(false);
     }
   }
 
