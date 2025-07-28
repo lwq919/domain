@@ -130,6 +130,20 @@ export async function initializeDatabase(env: any) {
     // 创建访问日志表
     await createAccessLogsTable(env);
 
+    // 创建系统日志表
+    await env.DB.prepare(`
+      CREATE TABLE IF NOT EXISTS system_logs (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        action TEXT NOT NULL,
+        details TEXT NOT NULL,
+        status TEXT NOT NULL,
+        timestamp DATETIME DEFAULT CURRENT_TIMESTAMP,
+        user_agent TEXT,
+        ip_address TEXT,
+        device_info TEXT
+      )
+    `).run();
+
     // 创建通知设置表
     await env.DB.prepare(`
       CREATE TABLE IF NOT EXISTS notification_settings (
@@ -173,6 +187,9 @@ export async function initializeDatabase(env: any) {
     `).run();
     await env.DB.prepare(`
       CREATE INDEX IF NOT EXISTS idx_notification_logs_domain ON notification_logs(domain)
+    `).run();
+    await env.DB.prepare(`
+      CREATE INDEX IF NOT EXISTS idx_system_logs_timestamp ON system_logs(timestamp)
     `).run();
 
     console.log('数据库初始化完成');
