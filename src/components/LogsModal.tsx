@@ -28,7 +28,7 @@ interface LogsModalProps {
 const LogsModal: React.FC<LogsModalProps> = ({ isOpen, onClose }) => {
   const [logs, setLogs] = useState<LogEntry[]>([]);
   const [loading, setLoading] = useState(false);
-  const [logType, setLogType] = useState<'all' | 'operation' | 'notification' | 'access'>('all');
+  const [logType, setLogType] = useState<'all' | 'operation' | 'notification' | 'access' | 'system'>('all');
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
   const [clearLoading, setClearLoading] = useState(false);
@@ -151,6 +151,24 @@ const LogsModal: React.FC<LogsModalProps> = ({ isOpen, onClose }) => {
         return '🌐';
       case 'login':
         return '🔑';
+      case 'daily_check':
+        return '🔍';
+      case 'expiring_domains_found':
+        return '⚠️';
+      case 'notification_sent':
+        return '✅';
+      case 'notification_failed':
+        return '❌';
+      case 'notification_disabled':
+        return '🔇';
+      case 'no_notification_methods':
+        return '⚙️';
+      case 'no_expiring_domains':
+        return '✅';
+      case 'notification_already_sent':
+        return '📅';
+      case 'check_error':
+        return '💥';
       default:
         return '📝';
     }
@@ -184,6 +202,7 @@ const LogsModal: React.FC<LogsModalProps> = ({ isOpen, onClose }) => {
                 }}
               >
                 <option value="all">全部日志</option>
+                <option value="system">系统日志</option>
                 <option value="operation">操作日志</option>
                 <option value="notification">通知日志</option>
                 <option value="access">访问日志</option>
@@ -309,7 +328,7 @@ const LogsModal: React.FC<LogsModalProps> = ({ isOpen, onClose }) => {
       <ConfirmModal
         isOpen={confirmModal}
         title="清理日志确认"
-        message={`确定要清理所有${logType === 'all' ? '' : logType === 'operation' ? '操作' : logType === 'notification' ? '通知' : '访问'}日志吗？此操作不可恢复。`}
+        message={`确定要清理所有${logType === 'all' ? '' : logType === 'system' ? '系统' : logType === 'operation' ? '操作' : logType === 'notification' ? '通知' : '访问'}日志吗？此操作不可恢复。`}
         onConfirm={handleConfirmClearLogs}
         onCancel={handleCancelClearLogs}
         confirmText="确定清理"
