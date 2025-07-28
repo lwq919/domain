@@ -172,7 +172,17 @@ const DomainTable: React.FC<DomainTableProps> = ({
           </thead>
           <tbody>
             {loading ? (
-              <tr><td colSpan={showRegistrar && showProgress ? 11 : 9} className="loading">加载中...</td></tr>
+              <tr style={{ height: '200px' }}>
+                <td colSpan={showRegistrar && showProgress ? 11 : 9} style={{ 
+                  textAlign: 'center', 
+                  verticalAlign: 'middle',
+                  height: '200px',
+                  fontSize: '16px',
+                  color: '#666'
+                }}>
+                  加载中...
+                </td>
+              </tr>
             ) : paged.length === 0 ? (
               <tr style={{ height: '200px' }}>
                 <td colSpan={showRegistrar && showProgress ? 11 : 9} style={{ 
