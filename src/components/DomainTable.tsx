@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Domain, SortOrder, STATUS_LABELS } from '../types';
-import { calculateProgress, getProgressClass, getDaysLeft, getDaysColor, copyToClipboard, isMobile } from '../utils';
+import { calculateProgress, getProgressClass, getDaysLeft, getDaysColor, copyToClipboard, isMobile, getDynamicStatus } from '../utils';
 
 interface DomainTableProps {
   domains: Domain[];
@@ -13,6 +13,7 @@ interface DomainTableProps {
   showProgress: boolean;
   page: number;
   pageSize: number;
+  warningDays: number;
   onSort: (field: string) => void;
   onSelectAll: (checked: boolean) => void;
   onSelectRow: (index: number, checked: boolean) => void;
@@ -37,6 +38,7 @@ const DomainTable: React.FC<DomainTableProps> = ({
   showProgress,
   page,
   pageSize,
+  warningDays,
   onSort,
   onSelectAll,
   onSelectRow,
@@ -189,12 +191,13 @@ const DomainTable: React.FC<DomainTableProps> = ({
               const checked = selectedIndexes.includes(index + (page - 1) * pageSize);
               const daysLeft = getDaysLeft(domain.expire_date);
               const daysColor = getDaysColor(daysLeft);
+              const dynamicStatus = getDynamicStatus(domain.expire_date, warningDays);
               
               return (
                 <tr key={domain.domain}>
                   <td className="domain-name" style={{ color: '#fff', fontWeight: 700 }}>{domain.domain}</td>
                   {showRegistrar && <td className="registrar">{domain.registrar}</td>}
-                  <td><span className={`status ${domain.status}`}>{STATUS_LABELS[domain.status]}</span></td>
+                  <td><span className={`status ${dynamicStatus}`}>{STATUS_LABELS[dynamicStatus]}</span></td>
                   <td className="date">{domain.register_date}</td>
                   <td className="date">{domain.expire_date}</td>
                   <td style={{ color: daysColor, fontWeight: 600 }}>{daysLeft}天</td>
