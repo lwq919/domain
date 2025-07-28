@@ -422,8 +422,10 @@ const App: React.FC = () => {
           console.error('记录系统日志失败:', error);
         });
         
+        // 始终显示弹窗，不管是否已经发送过通知
         setExpireModal(true);
         
+        // 通知发送逻辑保持不变，避免重复发送
         if (!notificationSentToday) {
           try {
             await notifyExpiring(expiring);
@@ -723,10 +725,8 @@ const App: React.FC = () => {
       localStorage.setItem('dontRemindToday', getTodayString());
       setDontRemindToday(true);
     }
-    if (!notificationSentToday) {
-      localStorage.setItem('lastNotificationDate', getTodayString());
-      setNotificationSentToday(true);
-    }
+    // 移除设置 lastNotificationDate 的逻辑，让弹窗在刷新后仍然能显示
+    // 只有在用户选择"今天不再提醒"时才阻止弹窗
   }
 
   function showInfoModal(title: string, message: string) {
