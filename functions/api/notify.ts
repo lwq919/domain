@@ -80,31 +80,23 @@ export const onRequest = async (context: any) => {
   const { request, env } = context;
   const method = request.method.toUpperCase();
 
-  // 记录请求开始
-  await logNotificationDetail(env, 'NOTIFY_REQUEST', `收到${method}请求`, 'info');
-
   if (method === 'GET') {
     // 查询通知设置
     try {
-      await logNotificationDetail(env, 'GET_SETTINGS', '开始查询通知设置', 'info');
-      
       const { results } = await env.DB.prepare(
         'SELECT warning_days as warningDays, notification_enabled as notificationEnabled, notification_interval as notificationInterval, notification_method as notificationMethods, email_config as emailConfig, telegram_bot_token as telegramBotToken, telegram_chat_id as telegramChatId, wechat_send_key as wechatSendKey, qq_key as qqKey, webhook_url as webhookUrl FROM notification_settings LIMIT 1'
       ).all();
       
       if (results.length === 0) {
-        await logNotificationDetail(env, 'GET_SETTINGS', '未找到通知设置', 'warning');
         return new Response(JSON.stringify({ success: true, settings: null }), {
           headers: { 'content-type': 'application/json' }
         });
       }
       
-      await logNotificationDetail(env, 'GET_SETTINGS', `成功获取通知设置: ${JSON.stringify(results[0])}`, 'success');
       return new Response(JSON.stringify({ success: true, settings: results[0] }), {
         headers: { 'content-type': 'application/json' }
       });
     } catch (e: any) {
-      await logNotificationDetail(env, 'GET_SETTINGS', `查询通知设置失败: ${e.message}`, 'error');
       return new Response(JSON.stringify({ success: false, error: e.message }), {
         status: 500,
         headers: { 'content-type': 'application/json' }
