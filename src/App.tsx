@@ -190,55 +190,33 @@ const App: React.FC = () => {
     };
   }, []);
 
-  // 检查到期域名 - 只在组件初始化时检查一次
   useEffect(() => {
-    // 只在组件首次加载且有域名数据时检查一次
+    // 只在有域名数据且没有禁用提醒时检查
     if (!dontRemindToday && domains.length > 0 && !isCheckingExpiring) {
-      // 检查是否今天已经检查过
-      const lastCheckDate = localStorage.getItem('lastExpiringCheckDate');
-      const today = getTodayString();
+      // 记录系统日志 - 开始检查
+      const deviceInfo = getDeviceInfo();
+      logSystem(
+        'daily_check',
+        `开始每日到期域名检查，域名总数: ${domains.length}`,
+        'success',
+        deviceInfo
+      ).catch(error => {
+        console.error('记录系统日志失败:', error);
+      });
       
-      if (lastCheckDate !== today) {
-        // 记录系统日志 - 开始检查
-        const deviceInfo = getDeviceInfo();
+      checkExpiringDomains(domains).catch(error => {
+        console.error('检查到期域名时出错:', error);
+        // 记录检查失败的系统日志
         logSystem(
-          'daily_check',
-          `开始每日到期域名检查，域名总数: ${domains.length}`,
-          'success',
+          'check_error',
+          `检查到期域名时发生错误: ${error instanceof Error ? error.message : '未知错误'}`,
+          'error',
           deviceInfo
-        ).catch(error => {
-          console.error('记录系统日志失败:', error);
+        ).catch(logError => {
+          console.error('记录系统日志失败:', logError);
         });
-        
-        checkExpiringDomains(domains).catch(error => {
-          console.error('检查到期域名时出错:', error);
-          // 记录检查失败的系统日志
-          logSystem(
-            'check_error',
-            `检查到期域名时发生错误: ${error instanceof Error ? error.message : '未知错误'}`,
-            'error',
-            deviceInfo
-          ).catch(logError => {
-            console.error('记录系统日志失败:', logError);
-          });
-        });
-        
-        // 记录今天的检查时间
-        localStorage.setItem('lastExpiringCheckDate', today);
-      } else {
-        // 记录今天已经检查过的日志
-        const deviceInfo = getDeviceInfo();
-        logSystem(
-          'check_already_done',
-          `今日已执行过到期域名检查，跳过重复检查`,
-          'info',
-          deviceInfo
-        ).catch(error => {
-          console.error('记录系统日志失败:', error);
-        });
-      }
+      });
     }
-    // 移除没有域名数据和提醒禁用的日志记录
   }, [dontRemindToday, isCheckingExpiring, domains.length]); // 添加 domains.length 依赖
 
   // 数据加载函数
