@@ -303,11 +303,11 @@ const DomainTable: React.FC<DomainTableProps> = ({
             {[10, 20, 50, 100].map(size => <option key={size} value={size}>{size}</option>)}
           </select>
           <span>条</span>
-          <span style={{ fontWeight: 700, fontSize: 18, minWidth: 120, textAlign: 'center', display: 'inline-block', color: '#fff' }}>共 {filteredDomains().length} 条数据</span>
+          <span style={{ fontWeight: 700, fontSize: 18, minWidth: 120, textAlign: 'center', display: 'inline-block', color: '#fff' }}>共 {filteredDomains.length} 条数据</span>
         </div>
       )}
     </div>
   );
-});
+};
 
 export default DomainTable; 
