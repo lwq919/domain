@@ -116,16 +116,13 @@ export async function initializeDatabase(env: any) {
       CREATE INDEX IF NOT EXISTS idx_domains_expire_date ON domains(expire_date)
     `).run();
     await env.DB.prepare(`
-      CREATE INDEX IF NOT EXISTS idx_operation_logs_timestamp ON operation_logs(timestamp)
+      CREATE INDEX IF NOT EXISTS idx_logs_timestamp ON logs(timestamp)
     `).run();
     await env.DB.prepare(`
-      CREATE INDEX IF NOT EXISTS idx_notification_logs_timestamp ON notification_logs(timestamp)
+      CREATE INDEX IF NOT EXISTS idx_logs_type ON logs(type)
     `).run();
     await env.DB.prepare(`
-      CREATE INDEX IF NOT EXISTS idx_notification_logs_domain ON notification_logs(domain)
-    `).run();
-    await env.DB.prepare(`
-      CREATE INDEX IF NOT EXISTS idx_system_logs_timestamp ON system_logs(timestamp)
+      CREATE INDEX IF NOT EXISTS idx_logs_domain ON logs(domain)
     `).run();
 
     console.log('数据库初始化完成');
