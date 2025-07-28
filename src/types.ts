@@ -13,12 +13,10 @@ export interface NotificationSettings {
   notificationEnabled: string;
   notificationInterval: string;
   notificationMethods: string[];
-  emailConfig?: string;
   telegramBotToken?: string;
   telegramChatId?: string;
   wechatSendKey?: string;
   qqKey?: string;
-  webhookUrl?: string;
 }
 
 export interface NotificationSettingsResponse {
@@ -42,12 +40,10 @@ export interface NotificationSettingsRequest {
   notificationEnabled: string;
   notificationInterval: string;
   notificationMethods: string[];
-  emailConfig?: string;
   telegramBotToken?: string;
   telegramChatId?: string;
   wechatSendKey?: string;
   qqKey?: string;
-  webhookUrl?: string;
 }
 
 export interface WebDAVConfig {
@@ -69,7 +65,7 @@ export interface WebDAVResponse {
 export type SortOrder = 'asc' | 'desc';
 export type FilterStatus = 'all' | 'active' | 'expired' | 'pending';
 export type ExportFormat = 'csv' | 'json' | 'txt';
-export type NotificationMethod = 'email' | 'telegram' | 'wechat' | 'qq' | 'webhook';
+export type NotificationMethod = 'telegram' | 'wechat' | 'qq';
 
 export const STATUS_LABELS: Record<string, string> = {
   active: '正常',
