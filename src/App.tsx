@@ -380,23 +380,23 @@ const App: React.FC = () => {
       // 记录检查结果
       const deviceInfo = getDeviceInfo();
       if (expiring.length > 0) {
-        // 记录找到到期域名的日志
-        logSystem(
-          'expiring_domains_found',
-          `找到 ${expiring.length} 个即将到期的域名，警告天数: ${localWarningDays}天`,
-          'warning',
-          deviceInfo
-        ).catch(error => {
-          console.error('记录系统日志失败:', error);
-        });
-        
         // 只在弹窗未显示时显示弹窗
         if (!expireModal) {
           setExpireModal(true);
         }
         
-        // 通知发送逻辑保持不变，避免重复发送
+        // 先检查通知状态，避免重复发送
         if (!notificationSentToday) {
+          // 记录找到到期域名的日志
+          logSystem(
+            'expiring_domains_found',
+            `找到 ${expiring.length} 个即将到期的域名，警告天数: ${localWarningDays}天`,
+            'warning',
+            deviceInfo
+          ).catch(error => {
+            console.error('记录系统日志失败:', error);
+          });
+          
           try {
             await notifyExpiring(expiring);
             localStorage.setItem('lastNotificationDate', getTodayString());
@@ -425,7 +425,7 @@ const App: React.FC = () => {
             });
           }
         } else {
-          // 记录今日已发送过通知
+          // 记录今日已发送过通知（优先显示）
           logSystem(
             'notification_already_sent',
             '今日已发送过到期通知，跳过重复发送',
