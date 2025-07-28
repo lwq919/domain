@@ -9,7 +9,8 @@ import {
   verifyAdminPassword,
   webdavBackup,
   webdavRestore,
-  logAccess
+  logAccess,
+  logSystem
 } from './api';
 import { Domain, defaultDomain, SortOrder, ExportFormat, NotificationMethod } from './types';
 import { 
@@ -189,14 +190,34 @@ const App: React.FC = () => {
     };
   }, []);
 
-  // 检查到期域名
+  // 检查到期域名 - 只在组件初始化时检查一次
   useEffect(() => {
+    // 只在组件首次加载且有域名数据时检查一次
     if (!dontRemindToday && domains.length > 0 && !isCheckingExpiring) {
-      checkExpiringDomains(domains).catch(error => {
-        console.error('检查到期域名时出错:', error);
-      });
+      // 检查是否今天已经检查过
+      const lastCheckDate = localStorage.getItem('lastExpiringCheckDate');
+      const today = getTodayString();
+      
+      if (lastCheckDate !== today) {
+        checkExpiringDomains(domains).catch(error => {
+          console.error('检查到期域名时出错:', error);
+        });
+        // 记录今天的检查时间
+        localStorage.setItem('lastExpiringCheckDate', today);
+        
+        // 记录系统日志
+        const deviceInfo = getDeviceInfo();
+        logSystem(
+          'daily_check',
+          `开始每日到期域名检查，域名总数: ${domains.length}`,
+          'success',
+          deviceInfo
+        ).catch(error => {
+          console.error('记录系统日志失败:', error);
+        });
+      }
     }
-  }, [dontRemindToday, domains.length, isCheckingExpiring]); // 添加 isCheckingExpiring 依赖
+  }, [dontRemindToday, isCheckingExpiring]); // 移除 domains.length 依赖，避免重复检查
 
   // 数据加载函数
   async function loadDomains() {
@@ -276,38 +297,39 @@ const App: React.FC = () => {
 
   // 到期域名检查
   async function checkExpiringDomains(domains: Domain[]) {
-    console.log('开始检查到期域名...');
-    
     if (dontRemindToday) {
-      console.log('今日已设置不提醒，跳过检查');
       return;
     }
     if (isCheckingExpiring) {
-      console.log('正在检查中，跳过重复检查');
       return; // 防止重复检查
     }
     
     setIsCheckingExpiring(true);
     
     try {
-      console.log('检查本地通知设置...');
       // 检查本地通知设置
       const localNotificationEnabled = notificationEnabled === 'true';
-      console.log('本地通知启用状态:', localNotificationEnabled);
       if (!localNotificationEnabled) {
-        console.log('本地通知未启用，跳过检查');
+        // 记录系统日志 - 通知未启用
+        const deviceInfo = getDeviceInfo();
+        logSystem(
+          'notification_disabled',
+          '本地通知功能未启用，跳过到期域名检查',
+          'warning',
+          deviceInfo
+        ).catch(error => {
+          console.error('记录系统日志失败:', error);
+        });
         return;
       }
       
       // 检查是否有配置通知方式
       const localMethods = localStorage.getItem('notificationMethods');
-      console.log('本地存储的通知方式:', localMethods);
       let hasNotificationMethods = false;
       if (localMethods) {
         try {
           const parsedMethods = JSON.parse(localMethods);
           hasNotificationMethods = Array.isArray(parsedMethods) && parsedMethods.length > 0;
-          console.log('解析后的本地通知方式:', parsedMethods, '是否有效:', hasNotificationMethods);
         } catch (error) {
           console.error('解析本地通知方式失败:', error);
           hasNotificationMethods = false;
@@ -316,20 +338,15 @@ const App: React.FC = () => {
       
       // 如果没有配置通知方式，尝试从服务器获取
       if (!hasNotificationMethods) {
-        console.log('本地未配置通知方式，尝试从服务器获取...');
         const settingsData = await fetchNotificationSettingsFromServer();
-        console.log('服务器通知设置:', settingsData);
         if (settingsData.success && settingsData.settings) {
           const settings = settingsData.settings;
           const serverNotificationEnabled = settings.notificationEnabled === 'true';
-          console.log('服务器通知启用状态:', serverNotificationEnabled);
           if (!serverNotificationEnabled) {
-            console.log('服务器通知未启用，跳过检查');
             return;
           }
           
           let methods = settings.notificationMethods;
-          console.log('服务器通知方式:', methods);
           if (Array.isArray(methods)) {
             hasNotificationMethods = methods.length > 0;
           } else if (typeof methods === 'string') {
@@ -341,60 +358,117 @@ const App: React.FC = () => {
               hasNotificationMethods = false;
             }
           }
-          console.log('服务器通知方式是否有效:', hasNotificationMethods);
         }
       }
       
       if (!hasNotificationMethods) {
-        console.log('未找到有效的通知方式配置，跳过检查');
+        // 记录系统日志 - 未配置通知方式
+        const deviceInfo = getDeviceInfo();
+        logSystem(
+          'no_notification_methods',
+          '未找到有效的通知方式配置，跳过到期域名检查',
+          'warning',
+          deviceInfo
+        ).catch(error => {
+          console.error('记录系统日志失败:', error);
+        });
         return;
       }
       
       // 使用本地设置或服务器设置的警告天数
       const localWarningDays = parseInt(warningDays || '15', 10);
-      console.log('使用警告天数:', localWarningDays);
       const today = new Date();
       const warningDate = new Date(today.getTime() + localWarningDays * 24 * 60 * 60 * 1000);
-      console.log('警告截止日期:', warningDate.toISOString());
       
       const expiring = domains.filter(domain => {
         const expire_date = new Date(domain.expire_date);
-        const isExpiring = expire_date <= warningDate && expire_date >= today;
-        if (isExpiring) {
-          console.log(`域名 ${domain.domain} 即将到期，到期时间: ${domain.expire_date}`);
-        }
-        return isExpiring;
+        return expire_date <= warningDate && expire_date >= today;
       });
       
-      console.log('找到即将到期的域名数量:', expiring.length);
       setExpiringDomains(expiring);
       
+      // 记录检查结果
+      const deviceInfo = getDeviceInfo();
       if (expiring.length > 0) {
-        console.log('显示到期提醒模态框');
+        // 记录找到到期域名的日志
+        logSystem(
+          'expiring_domains_found',
+          `找到 ${expiring.length} 个即将到期的域名，警告天数: ${localWarningDays}天`,
+          'warning',
+          deviceInfo
+        ).catch(error => {
+          console.error('记录系统日志失败:', error);
+        });
+        
         setExpireModal(true);
         
         if (!notificationSentToday) {
-          console.log('今日未发送过通知，开始发送到期通知，到期域名数量:', expiring.length);
           try {
             await notifyExpiring(expiring);
-            console.log('通知发送成功');
             localStorage.setItem('lastNotificationDate', getTodayString());
             setNotificationSentToday(true);
+            
+            // 记录通知发送成功
+            logSystem(
+              'notification_sent',
+              `成功发送到期通知，涉及 ${expiring.length} 个域名`,
+              'success',
+              deviceInfo
+            ).catch(error => {
+              console.error('记录系统日志失败:', error);
+            });
           } catch (error) {
             console.error('发送通知失败:', error);
+            
+            // 记录通知发送失败
+            logSystem(
+              'notification_failed',
+              `发送到期通知失败: ${error instanceof Error ? error.message : '未知错误'}`,
+              'error',
+              deviceInfo
+            ).catch(logError => {
+              console.error('记录系统日志失败:', logError);
+            });
           }
         } else {
-          console.log('今日已发送过通知，跳过发送');
+          // 记录今日已发送过通知
+          logSystem(
+            'notification_already_sent',
+            '今日已发送过到期通知，跳过重复发送',
+            'success',
+            deviceInfo
+          ).catch(error => {
+            console.error('记录系统日志失败:', error);
+          });
         }
       } else {
-        console.log('没有即将到期的域名');
+        // 记录没有到期域名的日志
+        logSystem(
+          'no_expiring_domains',
+          `检查完成，没有即将到期的域名，警告天数: ${localWarningDays}天`,
+          'success',
+          deviceInfo
+        ).catch(error => {
+          console.error('记录系统日志失败:', error);
+        });
       }
     } catch (error: any) {
       console.error('检查到期域名时出错:', error);
+      
+      // 记录系统错误日志
+      const deviceInfo = getDeviceInfo();
+      logSystem(
+        'check_error',
+        `检查到期域名时发生错误: ${error.message || '未知错误'}`,
+        'error',
+        deviceInfo
+      ).catch(logError => {
+        console.error('记录系统日志失败:', logError);
+      });
+      
       // 静默失败，不影响主要功能
     } finally {
       setIsCheckingExpiring(false);
-      console.log('检查到期域名完成');
     }
   }
 
