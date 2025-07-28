@@ -237,29 +237,8 @@ const App: React.FC = () => {
           console.error('记录系统日志失败:', error);
         });
       }
-    } else if (domains.length === 0) {
-      // 记录没有域名数据的日志
-      const deviceInfo = getDeviceInfo();
-      logSystem(
-        'no_domains',
-        `没有域名数据，跳过到期域名检查`,
-        'info',
-        deviceInfo
-      ).catch(error => {
-        console.error('记录系统日志失败:', error);
-      });
-    } else if (dontRemindToday) {
-      // 记录用户选择今天不再提醒的日志
-      const deviceInfo = getDeviceInfo();
-      logSystem(
-        'remind_disabled',
-        `用户选择今天不再提醒，跳过到期域名检查`,
-        'info',
-        deviceInfo
-      ).catch(error => {
-        console.error('记录系统日志失败:', error);
-      });
     }
+    // 移除没有域名数据和提醒禁用的日志记录
   }, [dontRemindToday, isCheckingExpiring, domains.length]); // 添加 domains.length 依赖
 
   // 数据加载函数
