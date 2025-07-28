@@ -74,25 +74,7 @@ async function sendQQNotify(content: string, key: string, qq: string) {
   return res.json();
 }
 
-// 邮件通知（MailChannels，Cloudflare Pages Functions原生支持）
-async function sendMailNotify(subject: string, content: string, mailTo: string, env: any) {
-  const mailData = {
-    personalizations: [{ to: [{ email: mailTo }] }],
-    from: { email: env.EMAIL_FROM, name: '域名到期提醒' },
-    subject,
-    content: [{ type: 'text/plain', value: content }]
-  };
-  const res = await fetch('https://api.mailchannels.net/tx/v1/send', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(mailData)
-  });
-  if (!res.ok) {
-    const errorText = await res.text();
-    throw new Error(`邮件发送失败: ${res.status} ${res.statusText} - ${errorText}`);
-  }
-  return res.json();
-}
+
 
 export const onRequest = async (context: any) => {
   const { request, env } = context;
@@ -182,10 +164,7 @@ export const onRequest = async (context: any) => {
           TG_USER_ID: env.TG_USER_ID ? '已配置' : '未配置',
           WECHAT_SENDKEY: env.WECHAT_SENDKEY ? '已配置' : '未配置',
           QMSG_KEY: env.QMSG_KEY ? '已配置' : '未配置',
-          QMSG_QQ: env.QMSG_QQ ? '已配置' : '未配置',
-          MAIL_TO: env.MAIL_TO ? '已配置' : '未配置',
-          EMAIL_FROM: env.EMAIL_FROM ? '已配置' : '未配置',
-          WEBHOOK_URL: env.WEBHOOK_URL ? '已配置' : '未配置'
+          QMSG_QQ: env.QMSG_QQ ? '已配置' : '未配置'
         };
         
         await logNotificationDetail(env, 'ENV_CHECK', `环境变量配置: ${JSON.stringify(envConfig)}`, 'info');
@@ -207,14 +186,6 @@ export const onRequest = async (context: any) => {
         if (env.QMSG_KEY && env.QMSG_QQ) {
           envMethods.push('qq');
           await logNotificationDetail(env, 'ENV_METHODS', '检测到QQ配置', 'info');
-        }
-        if (env.MAIL_TO) {
-          envMethods.push('email');
-          await logNotificationDetail(env, 'ENV_METHODS', '检测到邮件配置', 'info');
-        }
-        if (env.WEBHOOK_URL) {
-          envMethods.push('webhook');
-          await logNotificationDetail(env, 'ENV_METHODS', '检测到Webhook配置', 'info');
         }
         
         // 如果环境变量中有配置，优先使用环境变量
@@ -384,75 +355,7 @@ export const onRequest = async (context: any) => {
               
               results.push({ method: 'qq', ok: true });
               
-            } else if (method === 'email') {
-              const mailTo = env.MAIL_TO || settings.email_config;
-              if (!mailTo) {
-                const error = '未配置收件人邮箱';
-                await logNotificationDetail(env, 'EMAIL_ERROR', error, 'error', undefined, 'email', error);
-                throw new Error(error);
-              }
-              
-              if (!env.EMAIL_FROM) {
-                const error = '未配置发件人邮箱';
-                await logNotificationDetail(env, 'EMAIL_ERROR', error, 'error', undefined, 'email', error);
-                throw new Error(error);
-              }
-              
-              let content = `以下域名将在${warningDays}天内到期：\n\n`;
-              expiringDomains.forEach((domain: Domain) => {
-                const daysLeft = getDaysUntilExpiry(domain.expire_date);
-                content += `域名: ${domain.domain}\n注册商: ${domain.registrar}\n到期时间: ${domain.expire_date}\n剩余天数: ${daysLeft}天\n\n`;
-              });
-              content += '请及时续费以避免域名过期！';
-              
-              await logNotificationDetail(env, 'EMAIL_SEND', `发送邮件到: ${mailTo}，长度: ${content.length}字符`, 'info');
-              
-              const emailResponse = await sendMailNotify('域名到期提醒', content, mailTo, env);
-              await logNotificationDetail(env, 'EMAIL_SUCCESS', `邮件发送成功，响应: ${JSON.stringify(emailResponse)}`, 'success', undefined, 'email');
-              
-              results.push({ method: 'email', ok: true });
-              
-            } else if (method === 'webhook') {
-              const webhookUrl = env.WEBHOOK_URL || settings.webhook_url;
-              if (!webhookUrl) {
-                const error = '未配置Webhook URL';
-                await logNotificationDetail(env, 'WEBHOOK_ERROR', error, 'error', undefined, 'webhook', error);
-                throw new Error(error);
-              }
-              
-              const webhookData = {
-                title: '域名到期提醒',
-                content: expiringDomains.map((domain: Domain) => {
-                  const daysLeft = getDaysUntilExpiry(domain.expire_date);
-                  return {
-                    domain: domain.domain,
-                    registrar: domain.registrar,
-                    expire_date: domain.expire_date,
-                    days_left: daysLeft
-                  };
-                }),
-                timestamp: new Date().toISOString()
-              };
-              
-              await logNotificationDetail(env, 'WEBHOOK_SEND', `发送Webhook到: ${webhookUrl}`, 'info');
-              
-              const webhookResponse = await fetch(webhookUrl, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(webhookData)
-              });
-              
-              if (!webhookResponse.ok) {
-                const errorText = await webhookResponse.text();
-                const error = `Webhook请求失败: ${webhookResponse.status} ${webhookResponse.statusText} - ${errorText}`;
-                await logNotificationDetail(env, 'WEBHOOK_ERROR', error, 'error', undefined, 'webhook', error);
-                throw new Error(error);
-              }
-              
-              const responseData = await webhookResponse.json();
-              await logNotificationDetail(env, 'WEBHOOK_SUCCESS', `Webhook发送成功，响应: ${JSON.stringify(responseData)}`, 'success', undefined, 'webhook');
-              
-              results.push({ method: 'webhook', ok: true });
+
               
             } else {
               const error = '不支持的通知方式';
