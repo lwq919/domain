@@ -9,7 +9,7 @@ interface LogEntry {
   type?: string;
   action: string;
   details: string;
-  status: 'success' | 'error' | 'warning' | 'sent' | 'failed';
+  status: 'success' | 'error' | 'warning' | 'info' | 'sent' | 'failed';
   timestamp: string;
   user_agent?: string;
   ip_address?: string;
@@ -103,6 +103,8 @@ const LogsModal: React.FC<LogsModalProps> = ({ isOpen, onClose }) => {
         return '#ef4444';
       case 'warning':
         return '#f59e0b';
+      case 'info':
+        return '#3b82f6';
       default:
         return '#6b7280';
     }
@@ -116,6 +118,8 @@ const LogsModal: React.FC<LogsModalProps> = ({ isOpen, onClose }) => {
         return '错误';
       case 'warning':
         return '警告';
+      case 'info':
+        return '信息';
       case 'sent':
         return '已发送';
       case 'failed':
@@ -169,6 +173,12 @@ const LogsModal: React.FC<LogsModalProps> = ({ isOpen, onClose }) => {
         return '📅';
       case 'check_error':
         return '💥';
+      case 'check_already_done':
+        return '✅';
+      case 'no_domains':
+        return '📭';
+      case 'remind_disabled':
+        return '🔇';
       default:
         return '📝';
     }
