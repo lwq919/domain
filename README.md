@@ -49,7 +49,7 @@ CREATE TABLE IF NOT EXISTS notification_settings (
 
 CREATE TABLE IF NOT EXISTS logs (
   id INTEGER PRIMARY KEY AUTOINCREMENT,
-  type TEXT NOT NULL, -- 'operation', 'notification', 'access', 'system'
+  type TEXT NOT NULL,
   action TEXT NOT NULL,
   details TEXT NOT NULL,
   status TEXT NOT NULL,
