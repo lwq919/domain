@@ -169,7 +169,21 @@ export const onRequest = async (context: any) => {
         }
         
         if (!Array.isArray(notifyMethods) || notifyMethods.length === 0) notifyMethods = ['telegram'];
-        const expiringDomains = body.domains.filter((domain: Domain) => isExpiringSoon(domain.expire_date, 15));
+        
+        // 从数据库获取警告天数设置
+        let warningDays = 15; // 默认15天
+        try {
+          const { results } = await env.DB.prepare(
+            'SELECT warning_days FROM notification_settings LIMIT 1'
+          ).all();
+          if (results.length > 0 && results[0].warning_days) {
+            warningDays = parseInt(results[0].warning_days, 10) || 15;
+          }
+        } catch (error) {
+          console.error('获取警告天数设置失败:', error);
+        }
+        
+        const expiringDomains = body.domains.filter((domain: Domain) => isExpiringSoon(domain.expire_date, warningDays));
         if (expiringDomains.length === 0) {
           return new Response(JSON.stringify({ success: true, message: '没有即将到期的域名' }), { headers: { 'content-type': 'application/json' } });
         }
@@ -183,7 +197,7 @@ export const onRequest = async (context: any) => {
               const chatId = env.TG_USER_ID || settings.telegram_chat_id;
               if (!botToken || !chatId) throw new Error('Telegram配置未设置');
               let message = '⚠️ <b>域名到期提醒</b>\n\n';
-              message += `以下域名将在15天内到期：\n\n`;
+              message += `以下域名将在${warningDays}天内到期：\n\n`;
               expiringDomains.forEach((domain: Domain) => {
                 const daysLeft = getDaysUntilExpiry(domain.expire_date);
                 message += ` <b>${domain.domain}</b>\n`;
@@ -216,7 +230,7 @@ export const onRequest = async (context: any) => {
             } else if (method === 'wechat') {
               const sendKey = env.WECHAT_SENDKEY || settings.wechat_send_key;
               if (!sendKey) throw new Error('未配置微信SendKey');
-              let content = '以下域名将在15天内到期：\n\n';
+              let content = `以下域名将在${warningDays}天内到期：\n\n`;
               expiringDomains.forEach((domain: Domain) => {
                 const daysLeft = getDaysUntilExpiry(domain.expire_date);
                 content += `域名: ${domain.domain}\n注册商: ${domain.registrar}\n到期时间: ${domain.expire_date}\n剩余天数: ${daysLeft}天\n\n`;
@@ -228,7 +242,7 @@ export const onRequest = async (context: any) => {
               const key = env.QMSG_KEY || settings.qq_key;
               const qq = env.QMSG_QQ;
               if (!key || !qq) throw new Error('未配置Qmsg酱 key 或 QQ号');
-              let content = '以下域名将在15天内到期：\n\n';
+              let content = `以下域名将在${warningDays}天内到期：\n\n`;
               expiringDomains.forEach((domain: Domain) => {
                 const daysLeft = getDaysUntilExpiry(domain.expire_date);
                 content += `域名: ${domain.domain}\n注册商: ${domain.registrar}\n到期时间: ${domain.expire_date}\n剩余天数: ${daysLeft}天\n\n`;
@@ -239,7 +253,7 @@ export const onRequest = async (context: any) => {
             } else if (method === 'email') {
               const mailTo = env.MAIL_TO || settings.email_config;
               if (!mailTo) throw new Error('未配置收件人邮箱');
-              let content = '以下域名将在15天内到期：\n\n';
+              let content = `以下域名将在${warningDays}天内到期：\n\n`;
               expiringDomains.forEach((domain: Domain) => {
                 const daysLeft = getDaysUntilExpiry(domain.expire_date);
                 content += `域名: ${domain.domain}\n注册商: ${domain.registrar}\n到期时间: ${domain.expire_date}\n剩余天数: ${daysLeft}天\n\n`;
