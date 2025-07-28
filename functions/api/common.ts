@@ -59,32 +59,7 @@ export function validateDomainsArray(domains: any[]): { valid: boolean; invalidD
   };
 }
 
-export async function createAccessLogsTable(env: any) {
-  try {
-    await env.DB.prepare(`
-      CREATE TABLE IF NOT EXISTS access_logs (
-        id INTEGER PRIMARY KEY AUTOINCREMENT,
-        action TEXT NOT NULL,
-        details TEXT NOT NULL,
-        status TEXT NOT NULL,
-        timestamp DATETIME DEFAULT CURRENT_TIMESTAMP,
-        user_agent TEXT,
-        ip_address TEXT,
-        device_info TEXT
-      )
-    `).run();
-    
-    // 创建索引
-    await env.DB.prepare(`
-      CREATE INDEX IF NOT EXISTS idx_access_logs_timestamp ON access_logs(timestamp)
-    `).run();
-    
-    console.log('访问日志表创建成功');
-  } catch (error) {
-    console.error('创建访问日志表失败:', error);
-    throw error;
-  }
-}
+// 移除单独的访问日志表创建函数，合并到统一的日志表中
 
 export async function initializeDatabase(env: any) {
   try {
@@ -101,46 +76,21 @@ export async function initializeDatabase(env: any) {
       )
     `).run();
 
-    // 创建操作日志表
+    // 创建统一日志表（合并所有日志类型）
     await env.DB.prepare(`
-      CREATE TABLE IF NOT EXISTS operation_logs (
+      CREATE TABLE IF NOT EXISTS logs (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
-        action TEXT NOT NULL,
-        details TEXT NOT NULL,
-        status TEXT NOT NULL,
-        timestamp DATETIME DEFAULT CURRENT_TIMESTAMP,
-        user_agent TEXT,
-        ip_address TEXT
-      )
-    `).run();
-
-    // 创建通知日志表
-    await env.DB.prepare(`
-      CREATE TABLE IF NOT EXISTS notification_logs (
-        id INTEGER PRIMARY KEY AUTOINCREMENT,
-        domain TEXT NOT NULL,
-        notification_method TEXT NOT NULL,
-        status TEXT NOT NULL,
-        message TEXT NOT NULL,
-        timestamp DATETIME DEFAULT CURRENT_TIMESTAMP,
-        error_details TEXT
-      )
-    `).run();
-
-    // 创建访问日志表
-    await createAccessLogsTable(env);
-
-    // 创建系统日志表
-    await env.DB.prepare(`
-      CREATE TABLE IF NOT EXISTS system_logs (
-        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        type TEXT NOT NULL, -- 'operation', 'notification', 'access', 'system'
         action TEXT NOT NULL,
         details TEXT NOT NULL,
         status TEXT NOT NULL,
         timestamp DATETIME DEFAULT CURRENT_TIMESTAMP,
         user_agent TEXT,
         ip_address TEXT,
-        device_info TEXT
+        device_info TEXT,
+        domain TEXT,
+        notification_method TEXT,
+        error_details TEXT
       )
     `).run();
 
@@ -148,10 +98,10 @@ export async function initializeDatabase(env: any) {
     await env.DB.prepare(`
       CREATE TABLE IF NOT EXISTS notification_settings (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
-        warning_days TEXT NOT NULL DEFAULT '15',
-        notification_enabled TEXT NOT NULL DEFAULT 'true',
-        notification_interval TEXT NOT NULL DEFAULT 'daily',
-        notification_method TEXT NOT NULL DEFAULT '[]',
+        warning_days TEXT NOT NULL,
+        notification_enabled TEXT NOT NULL,
+        notification_interval TEXT NOT NULL,
+        notification_method TEXT NOT NULL,
         email_config TEXT,
         telegram_bot_token TEXT,
         telegram_chat_id TEXT,
