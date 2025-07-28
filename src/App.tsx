@@ -199,13 +199,7 @@ const App: React.FC = () => {
       const today = getTodayString();
       
       if (lastCheckDate !== today) {
-        checkExpiringDomains(domains).catch(error => {
-          console.error('检查到期域名时出错:', error);
-        });
-        // 记录今天的检查时间
-        localStorage.setItem('lastExpiringCheckDate', today);
-        
-        // 记录系统日志
+        // 记录系统日志 - 开始检查
         const deviceInfo = getDeviceInfo();
         logSystem(
           'daily_check',
@@ -215,9 +209,58 @@ const App: React.FC = () => {
         ).catch(error => {
           console.error('记录系统日志失败:', error);
         });
+        
+        checkExpiringDomains(domains).catch(error => {
+          console.error('检查到期域名时出错:', error);
+          // 记录检查失败的系统日志
+          logSystem(
+            'check_error',
+            `检查到期域名时发生错误: ${error instanceof Error ? error.message : '未知错误'}`,
+            'error',
+            deviceInfo
+          ).catch(logError => {
+            console.error('记录系统日志失败:', logError);
+          });
+        });
+        
+        // 记录今天的检查时间
+        localStorage.setItem('lastExpiringCheckDate', today);
+      } else {
+        // 记录今天已经检查过的日志
+        const deviceInfo = getDeviceInfo();
+        logSystem(
+          'check_already_done',
+          `今日已执行过到期域名检查，跳过重复检查`,
+          'info',
+          deviceInfo
+        ).catch(error => {
+          console.error('记录系统日志失败:', error);
+        });
       }
+    } else if (domains.length === 0) {
+      // 记录没有域名数据的日志
+      const deviceInfo = getDeviceInfo();
+      logSystem(
+        'no_domains',
+        `没有域名数据，跳过到期域名检查`,
+        'info',
+        deviceInfo
+      ).catch(error => {
+        console.error('记录系统日志失败:', error);
+      });
+    } else if (dontRemindToday) {
+      // 记录用户选择今天不再提醒的日志
+      const deviceInfo = getDeviceInfo();
+      logSystem(
+        'remind_disabled',
+        `用户选择今天不再提醒，跳过到期域名检查`,
+        'info',
+        deviceInfo
+      ).catch(error => {
+        console.error('记录系统日志失败:', error);
+      });
     }
-  }, [dontRemindToday, isCheckingExpiring]); // 移除 domains.length 依赖，避免重复检查
+  }, [dontRemindToday, isCheckingExpiring, domains.length]); // 添加 domains.length 依赖
 
   // 数据加载函数
   async function loadDomains() {
