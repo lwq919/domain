@@ -276,77 +276,125 @@ const App: React.FC = () => {
 
   // 到期域名检查
   async function checkExpiringDomains(domains: Domain[]) {
-    if (dontRemindToday) return;
-    if (isCheckingExpiring) return; // 防止重复检查
+    console.log('开始检查到期域名...');
+    
+    if (dontRemindToday) {
+      console.log('今日已设置不提醒，跳过检查');
+      return;
+    }
+    if (isCheckingExpiring) {
+      console.log('正在检查中，跳过重复检查');
+      return; // 防止重复检查
+    }
     
     setIsCheckingExpiring(true);
     
     try {
+      console.log('检查本地通知设置...');
       // 检查本地通知设置
       const localNotificationEnabled = notificationEnabled === 'true';
-      if (!localNotificationEnabled) return;
+      console.log('本地通知启用状态:', localNotificationEnabled);
+      if (!localNotificationEnabled) {
+        console.log('本地通知未启用，跳过检查');
+        return;
+      }
       
       // 检查是否有配置通知方式
       const localMethods = localStorage.getItem('notificationMethods');
+      console.log('本地存储的通知方式:', localMethods);
       let hasNotificationMethods = false;
       if (localMethods) {
         try {
           const parsedMethods = JSON.parse(localMethods);
           hasNotificationMethods = Array.isArray(parsedMethods) && parsedMethods.length > 0;
-        } catch {
+          console.log('解析后的本地通知方式:', parsedMethods, '是否有效:', hasNotificationMethods);
+        } catch (error) {
+          console.error('解析本地通知方式失败:', error);
           hasNotificationMethods = false;
         }
       }
       
       // 如果没有配置通知方式，尝试从服务器获取
       if (!hasNotificationMethods) {
+        console.log('本地未配置通知方式，尝试从服务器获取...');
         const settingsData = await fetchNotificationSettingsFromServer();
+        console.log('服务器通知设置:', settingsData);
         if (settingsData.success && settingsData.settings) {
           const settings = settingsData.settings;
           const serverNotificationEnabled = settings.notificationEnabled === 'true';
-          if (!serverNotificationEnabled) return;
+          console.log('服务器通知启用状态:', serverNotificationEnabled);
+          if (!serverNotificationEnabled) {
+            console.log('服务器通知未启用，跳过检查');
+            return;
+          }
           
           let methods = settings.notificationMethods;
+          console.log('服务器通知方式:', methods);
           if (Array.isArray(methods)) {
             hasNotificationMethods = methods.length > 0;
           } else if (typeof methods === 'string') {
             try {
               const parsedMethods = JSON.parse(methods);
               hasNotificationMethods = Array.isArray(parsedMethods) && parsedMethods.length > 0;
-            } catch {
+            } catch (error) {
+              console.error('解析服务器通知方式失败:', error);
               hasNotificationMethods = false;
             }
           }
+          console.log('服务器通知方式是否有效:', hasNotificationMethods);
         }
       }
       
-      if (!hasNotificationMethods) return;
+      if (!hasNotificationMethods) {
+        console.log('未找到有效的通知方式配置，跳过检查');
+        return;
+      }
       
       // 使用本地设置或服务器设置的警告天数
       const localWarningDays = parseInt(warningDays || '15', 10);
+      console.log('使用警告天数:', localWarningDays);
       const today = new Date();
       const warningDate = new Date(today.getTime() + localWarningDays * 24 * 60 * 60 * 1000);
+      console.log('警告截止日期:', warningDate.toISOString());
+      
       const expiring = domains.filter(domain => {
         const expire_date = new Date(domain.expire_date);
-        return expire_date <= warningDate && expire_date >= today;
+        const isExpiring = expire_date <= warningDate && expire_date >= today;
+        if (isExpiring) {
+          console.log(`域名 ${domain.domain} 即将到期，到期时间: ${domain.expire_date}`);
+        }
+        return isExpiring;
       });
       
+      console.log('找到即将到期的域名数量:', expiring.length);
       setExpiringDomains(expiring);
+      
       if (expiring.length > 0) {
+        console.log('显示到期提醒模态框');
         setExpireModal(true);
         
         if (!notificationSentToday) {
-          console.log('发送到期通知，到期域名数量:', expiring.length);
-          await notifyExpiring(expiring);
-          localStorage.setItem('lastNotificationDate', getTodayString());
-          setNotificationSentToday(true);
+          console.log('今日未发送过通知，开始发送到期通知，到期域名数量:', expiring.length);
+          try {
+            await notifyExpiring(expiring);
+            console.log('通知发送成功');
+            localStorage.setItem('lastNotificationDate', getTodayString());
+            setNotificationSentToday(true);
+          } catch (error) {
+            console.error('发送通知失败:', error);
+          }
+        } else {
+          console.log('今日已发送过通知，跳过发送');
         }
+      } else {
+        console.log('没有即将到期的域名');
       }
     } catch (error: any) {
       console.error('检查到期域名时出错:', error);
       // 静默失败，不影响主要功能
     } finally {
       setIsCheckingExpiring(false);
+      console.log('检查到期域名完成');
     }
   }
 
