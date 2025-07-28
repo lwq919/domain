@@ -59,8 +59,6 @@ export function validateDomainsArray(domains: any[]): { valid: boolean; invalidD
   };
 }
 
-// 移除单独的访问日志表创建函数，合并到统一的日志表中
-
 export async function initializeDatabase(env: any) {
   try {
     // 创建域名表
@@ -72,7 +70,7 @@ export async function initializeDatabase(env: any) {
         register_date TEXT NOT NULL,
         expire_date TEXT NOT NULL,
         status TEXT NOT NULL DEFAULT 'active',
-        renew_url TEXT
+        renewUrl TEXT
       )
     `).run();
 
@@ -102,21 +100,9 @@ export async function initializeDatabase(env: any) {
         notification_enabled TEXT NOT NULL,
         notification_interval TEXT NOT NULL,
         notification_method TEXT NOT NULL,
-        email_config TEXT,
-        telegram_bot_token TEXT,
-        telegram_chat_id TEXT,
-        wechat_send_key TEXT,
-        qq_key TEXT,
-        webhook_url TEXT,
         created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
         updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
       )
-    `).run();
-
-    // 插入默认通知设置
-    await env.DB.prepare(`
-      INSERT OR IGNORE INTO notification_settings (id, warning_days, notification_enabled, notification_interval, notification_method)
-      VALUES (1, '15', 'true', 'daily', '[]')
     `).run();
 
     // 创建索引
