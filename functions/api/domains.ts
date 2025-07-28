@@ -3,8 +3,8 @@ import { Domain, validateDomain, createErrorResponse, createSuccessResponse, val
 // 记录操作日志的函数
 async function logOperation(env: any, action: string, details: string, status: 'success' | 'error' | 'warning' = 'success') {
   try {
-    const userAgent = 'Server-Side'; // 服务器端操作
-    const ipAddress = '127.0.0.1'; // 本地操作
+    const userAgent = 'Server-Side';
+    const ipAddress = '127.0.0.1';
     
     await env.DB.prepare(
       'INSERT INTO operation_logs (action, details, status, user_agent, ip_address) VALUES (?, ?, ?, ?, ?)'
