@@ -103,7 +103,7 @@ export const onRequest = async (context: any) => {
       // 保存通知设置
       if (body.settings) {
         const s = body.settings as NotificationSettings;
-        if (!s.warningDays || !s.notificationEnabled || !s.notificationInterval || !s.notificationMethods) {
+        if (!s.warningDays || !s.notificationEnabled || !s.notificationInterval) {
           return new Response(JSON.stringify({ success: false, error: '参数不完整' }), {
             status: 400,
             headers: { 'content-type': 'application/json' }
@@ -116,7 +116,7 @@ export const onRequest = async (context: any) => {
           s.warningDays, 
           s.notificationEnabled, 
           s.notificationInterval, 
-          JSON.stringify(s.notificationMethods),
+          JSON.stringify(s.notificationMethods || []),
           s.emailConfig || null,
           s.telegramBotToken || null,
           s.telegramChatId || null,
