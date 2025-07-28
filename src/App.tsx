@@ -282,16 +282,50 @@ const App: React.FC = () => {
     if (dontRemindToday) return;
     
     try {
-      const settingsData = await fetchNotificationSettingsFromServer();
-      if (!settingsData.success || !settingsData.settings) return;
+      // 检查本地通知设置
+      const localNotificationEnabled = notificationEnabled === 'true';
+      if (!localNotificationEnabled) return;
       
-      const settings = settingsData.settings;
-      const notificationEnabled = settings.notificationEnabled === 'true';
-      if (!notificationEnabled) return;
+      // 检查是否有配置通知方式
+      const localMethods = localStorage.getItem('notificationMethods');
+      let hasNotificationMethods = false;
+      if (localMethods) {
+        try {
+          const parsedMethods = JSON.parse(localMethods);
+          hasNotificationMethods = Array.isArray(parsedMethods) && parsedMethods.length > 0;
+        } catch {
+          hasNotificationMethods = false;
+        }
+      }
       
-      const warningDays = parseInt(settings.warningDays || '15', 10);
+      // 如果没有配置通知方式，尝试从服务器获取
+      if (!hasNotificationMethods) {
+        const settingsData = await fetchNotificationSettingsFromServer();
+        if (settingsData.success && settingsData.settings) {
+          const settings = settingsData.settings;
+          const serverNotificationEnabled = settings.notificationEnabled === 'true';
+          if (!serverNotificationEnabled) return;
+          
+          let methods = settings.notificationMethods;
+          if (Array.isArray(methods)) {
+            hasNotificationMethods = methods.length > 0;
+          } else if (typeof methods === 'string') {
+            try {
+              const parsedMethods = JSON.parse(methods);
+              hasNotificationMethods = Array.isArray(parsedMethods) && parsedMethods.length > 0;
+            } catch {
+              hasNotificationMethods = false;
+            }
+          }
+        }
+      }
+      
+      if (!hasNotificationMethods) return;
+      
+      // 使用本地设置或服务器设置的警告天数
+      const localWarningDays = parseInt(warningDays || '15', 10);
       const today = new Date();
-      const warningDate = new Date(today.getTime() + warningDays * 24 * 60 * 60 * 1000);
+      const warningDate = new Date(today.getTime() + localWarningDays * 24 * 60 * 60 * 1000);
       const expiring = domains.filter(domain => {
         const expire_date = new Date(domain.expire_date);
         return expire_date <= warningDate && expire_date >= today;
@@ -302,6 +336,7 @@ const App: React.FC = () => {
         setExpireModal(true);
         
         if (!notificationSentToday) {
+          console.log('发送到期通知，到期域名数量:', expiring.length);
           await notifyExpiring(expiring);
           localStorage.setItem('lastNotificationDate', getTodayString());
           setNotificationSentToday(true);
