@@ -281,7 +281,7 @@ export async function logNotification(domain: string, notification_method: strin
   }
 }
 
-export async function logSystem(action: string, details: string, status: 'success' | 'error' | 'warning' = 'success', device_info?: string): Promise<void> {
+export async function logSystem(action: string, details: string, status: 'success' | 'error' | 'warning' | 'info' = 'success', device_info?: string): Promise<void> {
   try {
     await fetch('/api/logs', {
       method: 'POST',
