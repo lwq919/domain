@@ -279,4 +279,22 @@ export async function logNotification(domain: string, notification_method: strin
   } catch (error) {
     console.error('记录通知日志失败:', error);
   }
+}
+
+export async function logSystem(action: string, details: string, status: 'success' | 'error' | 'warning' = 'success', device_info?: string): Promise<void> {
+  try {
+    await fetch('/api/logs', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        type: 'system',
+        action,
+        details,
+        status,
+        device_info
+      })
+    });
+  } catch (error) {
+    console.error('记录系统日志失败:', error);
+  }
 } 
