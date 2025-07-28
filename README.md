@@ -27,15 +27,14 @@ Fork该项目到你的 GitHub 仓库
 ```sql
 CREATE TABLE IF NOT EXISTS domains (
   id INTEGER PRIMARY KEY AUTOINCREMENT,
-  domain TEXT NOT NULL,
-  status TEXT NOT NULL,
+  domain TEXT UNIQUE NOT NULL,
   registrar TEXT NOT NULL,
   register_date TEXT NOT NULL,
   expire_date TEXT NOT NULL,
+  status TEXT NOT NULL DEFAULT 'active',
   renewUrl TEXT
 );
 CREATE INDEX IF NOT EXISTS idx_domains_domain ON domains(domain);
-CREATE INDEX IF NOT EXISTS idx_domains_status ON domains(status);
 CREATE INDEX IF NOT EXISTS idx_domains_expire_date ON domains(expire_date);
 
 CREATE TABLE IF NOT EXISTS notification_settings (
@@ -44,51 +43,26 @@ CREATE TABLE IF NOT EXISTS notification_settings (
   notification_enabled TEXT NOT NULL,
   notification_interval TEXT NOT NULL,
   notification_method TEXT NOT NULL,
-  email_config TEXT,
-  telegram_bot_token TEXT,
-  telegram_chat_id TEXT,
-  wechat_send_key TEXT,
-  qq_key TEXT,
-  webhook_url TEXT,
   created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
   updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
 );
 
-CREATE TABLE IF NOT EXISTS operation_logs (
+CREATE TABLE IF NOT EXISTS logs (
   id INTEGER PRIMARY KEY AUTOINCREMENT,
-  action TEXT NOT NULL,
-  details TEXT NOT NULL,
-  status TEXT NOT NULL,
-  timestamp DATETIME DEFAULT CURRENT_TIMESTAMP,
-  user_agent TEXT,
-  ip_address TEXT
-);
-
-CREATE TABLE IF NOT EXISTS notification_logs (
-  id INTEGER PRIMARY KEY AUTOINCREMENT,
-  domain TEXT NOT NULL,
-  notification_method TEXT NOT NULL,
-  status TEXT NOT NULL,
-  message TEXT NOT NULL,
-  timestamp DATETIME DEFAULT CURRENT_TIMESTAMP,
-  error_details TEXT
-);
-
-CREATE TABLE IF NOT EXISTS access_logs (
-  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  type TEXT NOT NULL, -- 'operation', 'notification', 'access', 'system'
   action TEXT NOT NULL,
   details TEXT NOT NULL,
   status TEXT NOT NULL,
   timestamp DATETIME DEFAULT CURRENT_TIMESTAMP,
   user_agent TEXT,
   ip_address TEXT,
-  device_info TEXT
+  device_info TEXT,
+  domain TEXT,
+  notification_method TEXT,
+  error_details TEXT
 );
-
-CREATE INDEX IF NOT EXISTS idx_operation_logs_timestamp ON operation_logs(timestamp);
-CREATE INDEX IF NOT EXISTS idx_notification_logs_timestamp ON notification_logs(timestamp);
-CREATE INDEX IF NOT EXISTS idx_notification_logs_domain ON notification_logs(domain);
-CREATE INDEX IF NOT EXISTS idx_access_logs_timestamp ON access_logs(timestamp);
+CREATE INDEX IF NOT EXISTS idx_logs_timestamp ON logs(timestamp);
+CREATE INDEX IF NOT EXISTS idx_logs_type ON logs(type);
 ```
 
 ## 🔧 环境变量配置
