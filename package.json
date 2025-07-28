@@ -7,17 +7,14 @@
     "dev": "vite",
     "build": "vite build",
     "build:analyze": "vite build --mode analyze",
-    "build:prod": "vite build --mode production",
     "preview": "vite preview",
     "lint": "eslint src --ext ts,tsx --report-unused-disable-directives --max-warnings 0",
     "lint:fix": "eslint src --ext ts,tsx --fix",
     "type-check": "tsc --noEmit",
+
     "bundle-analyzer": "npm run build:analyze && npx vite-bundle-analyzer dist",
     "clean": "rm -rf dist node_modules/.vite",
-    "prebuild": "npm run clean",
-    "performance": "npm run build:prod && npx lighthouse dist/index.html --output=json --output-path=./lighthouse-report.json",
-    "audit": "npm audit && npm run type-check && npm run lint",
-    "optimize": "npm run clean && npm run build:prod && npm run bundle-analyzer"
+    "prebuild": "npm run clean"
   },
   "dependencies": {
     "react": "^18.2.0",
@@ -55,9 +52,5 @@
       "last 1 firefox version",
       "last 1 safari version"
     ]
-  },
-  "engines": {
-    "node": ">=16.0.0",
-    "npm": ">=8.0.0"
   }
 }
