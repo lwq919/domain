@@ -390,8 +390,10 @@ const App: React.FC = () => {
           console.error('记录系统日志失败:', error);
         });
         
-        // 始终显示弹窗，不管是否已经发送过通知
-        setExpireModal(true);
+        // 只在弹窗未显示时显示弹窗
+        if (!expireModal) {
+          setExpireModal(true);
+        }
         
         // 通知发送逻辑保持不变，避免重复发送
         if (!notificationSentToday) {
