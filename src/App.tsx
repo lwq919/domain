@@ -846,7 +846,7 @@ const App: React.FC = () => {
         <button className="settings-btn" onClick={() => setSettingsModal(true)}>⚙️</button>
       </div>
 
-      <StatsGrid domains={domains} />
+              <StatsGrid domains={domains} warningDays={parseInt(warningDays || '15', 10)} />
 
       <DomainTable
         domains={domains}
@@ -859,6 +859,7 @@ const App: React.FC = () => {
         showProgress={showProgress}
         page={page}
         pageSize={pageSize}
+        warningDays={parseInt(warningDays || '15', 10)}
         onSort={handleSort}
         onSelectAll={handleSelectAll}
         onSelectRow={handleSelectRow}
