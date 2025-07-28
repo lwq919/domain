@@ -3,7 +3,7 @@ export interface LogEntry {
   type: 'operation' | 'notification' | 'access' | 'system';
   action: string;
   details: string;
-  status: 'success' | 'error' | 'warning';
+  status: 'success' | 'error' | 'warning' | 'info';
   timestamp: string;
   user_agent?: string;
   ip_address?: string;
