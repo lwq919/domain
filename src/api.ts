@@ -1,62 +1,5 @@
 import { Domain, DomainsResponse, NotificationSettingsResponse, NotificationSettingsRequest, WebDAVConfig, WebDAVResponse } from './types';
 
-// 缓存系统
-class APICache {
-  private cache = new Map<string, { data: any; timestamp: number; ttl: number }>();
-
-  set(key: string, data: any, ttl: number = 5 * 60 * 1000) { // 默认5分钟缓存
-    this.cache.set(key, {
-      data,
-      timestamp: Date.now(),
-      ttl
-    });
-  }
-
-  get(key: string): any | null {
-    const item = this.cache.get(key);
-    if (!item) return null;
-    
-    if (Date.now() - item.timestamp > item.ttl) {
-      this.cache.delete(key);
-      return null;
-    }
-    
-    return item.data;
-  }
-
-  clear() {
-    this.cache.clear();
-  }
-
-  delete(key: string) {
-    this.cache.delete(key);
-  }
-}
-
-// 请求去重系统
-class RequestDeduplicator {
-  private pendingRequests = new Map<string, Promise<any>>();
-
-  async deduplicate<T>(key: string, requestFn: () => Promise<T>): Promise<T> {
-    if (this.pendingRequests.has(key)) {
-      return this.pendingRequests.get(key)!;
-    }
-
-    const promise = requestFn();
-    this.pendingRequests.set(key, promise);
-
-    try {
-      const result = await promise;
-      return result;
-    } finally {
-      this.pendingRequests.delete(key);
-    }
-  }
-}
-
-const apiCache = new APICache();
-const requestDeduplicator = new RequestDeduplicator();
-
 async function fetchWithRetry(url: string, options?: RequestInit, retries = 3): Promise<Response> {
   for (let i = 0; i < retries; i++) {
     try {
@@ -73,31 +16,20 @@ async function fetchWithRetry(url: string, options?: RequestInit, retries = 3): 
 }
 
 export async function fetchDomains(): Promise<Domain[]> {
-  const cacheKey = 'domains';
-  const cached = apiCache.get(cacheKey);
-  if (cached) {
-    return cached;
+  const res = await fetchWithRetry('/api/domains');
+  if (!res.ok) {
+    throw new Error(`HTTP ${res.status}: ${res.statusText}`);
   }
-
-  return requestDeduplicator.deduplicate(cacheKey, async () => {
-    const res = await fetchWithRetry('/api/domains');
-    if (!res.ok) {
-      throw new Error(`HTTP ${res.status}: ${res.statusText}`);
-    }
-    const text = await res.text();
-    let data: DomainsResponse = { success: false };
-    try {
-      data = text ? JSON.parse(text) : { success: false };
-    } catch (error) {
-      console.error('解析响应失败:', error);
-      data = { success: false, error: '响应格式错误' };
-    }
-    if (data.success && data.domains) {
-      apiCache.set(cacheKey, data.domains, 30 * 1000); // 30秒缓存
-      return data.domains;
-    }
-    throw new Error(data.error || '获取域名失败');
-  });
+  const text = await res.text();
+  let data: DomainsResponse = { success: false };
+  try {
+    data = text ? JSON.parse(text) : { success: false };
+  } catch (error) {
+    console.error('解析响应失败:', error);
+    data = { success: false, error: '响应格式错误' };
+  }
+  if (data.success && data.domains) return data.domains;
+  throw new Error(data.error || '获取域名失败');
 }
 
 export async function saveDomains(domains: Domain[]): Promise<void> {
@@ -118,9 +50,6 @@ export async function saveDomains(domains: Domain[]): Promise<void> {
     data = { success: false, error: '响应格式错误' };
   }
   if (!data.success) throw new Error(data.error || '保存失败');
-  
-  // 清除缓存
-  apiCache.delete('domains');
 }
 
 export async function deleteDomain(domain: string): Promise<void> {
@@ -141,9 +70,6 @@ export async function deleteDomain(domain: string): Promise<void> {
     data = { success: false, error: '响应格式错误' };
   }
   if (!data.success) throw new Error(data.error || '删除失败');
-  
-  // 清除缓存
-  apiCache.delete('domains');
 }
 
 export async function notifyExpiring(domains: Domain[]): Promise<void> {
@@ -172,70 +98,78 @@ export async function notifyExpiring(domains: Domain[]): Promise<void> {
       console.error('通知发送失败:', responseData.error);
       throw new Error(responseData.error || '通知发送失败');
     }
+    
+    console.log('通知发送成功:', responseData);
   } catch (error) {
-    console.error('通知发送异常:', error);
+    console.error('发送通知时发生错误:', error);
     throw error;
   }
 }
 
-// 缓存通知设置
 export async function fetchNotificationSettingsFromServer(): Promise<NotificationSettingsResponse> {
-  const cacheKey = 'notification-settings';
-  const cached = apiCache.get(cacheKey);
-  if (cached) {
-    return cached;
-  }
-
-  return requestDeduplicator.deduplicate(cacheKey, async () => {
-    const response = await fetch('/api/notification-settings');
-    const data = await response.json();
-    apiCache.set(cacheKey, data, 5 * 60 * 1000); // 5分钟缓存
-    return data;
-  });
+  const res = await fetch('/api/notify');
+  return res.json();
 }
 
 export async function saveNotificationSettingsToServer(settings: NotificationSettingsRequest): Promise<NotificationSettingsResponse> {
-  const response = await fetch('/api/notification-settings', {
+  const res = await fetch('/api/notify', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(settings)
+    body: JSON.stringify({ settings })
   });
-  const data = await response.json();
-  
-  // 清除缓存
-  apiCache.delete('notification-settings');
-  return data;
+  return res.json();
 }
 
 export async function verifyAdminPassword(password: string): Promise<boolean> {
-  const response = await fetch('/api/verify-password', {
+  const res = await fetch('/api/password', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ password })
   });
-  const data = await response.json();
-  return data.success || false;
+  const data = await res.json();
+  return data.success === true;
 }
 
 export async function webdavBackup(webdavConfig: WebDAVConfig): Promise<WebDAVResponse> {
-  const response = await fetch('/api/webdav/backup', {
+  const res = await fetchWithRetry('/api/webdav', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(webdavConfig)
+    body: JSON.stringify({ action: 'backup', webdavConfig })
   });
-  return await response.json();
+  
+  if (!res.ok) {
+    throw new Error(`HTTP ${res.status}: ${res.statusText}`);
+  }
+  
+  const data = await res.json();
+  if (!data.success) {
+    throw new Error(data.error || '备份失败');
+  }
+  
+  return data;
 }
 
 export async function webdavRestore(webdavConfig: WebDAVConfig, filename?: string): Promise<WebDAVResponse> {
-  const response = await fetch('/api/webdav/restore', {
+  const res = await fetchWithRetry('/api/webdav', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ ...webdavConfig, filename })
+    body: JSON.stringify({ action: 'restore', webdavConfig, filename })
   });
-  return await response.json();
+  
+  if (!res.ok) {
+    throw new Error(`HTTP ${res.status}: ${res.statusText}`);
+  }
+  
+  const data = await res.json();
+  if (!data.success) {
+    throw new Error(data.error || '恢复失败');
+  }
+  
+  return data;
 }
 
-// 日志相关接口
+
+
 export interface LogEntry {
   id?: number;
   log_type?: string;
@@ -265,31 +199,32 @@ export interface LogsResponse {
 }
 
 export async function getLogs(type: string = 'all', limit: number = 50, offset: number = 0): Promise<LogsResponse> {
-  const cacheKey = `logs-${type}-${limit}-${offset}`;
-  const cached = apiCache.get(cacheKey);
-  if (cached) {
-    return cached;
-  }
-
-  return requestDeduplicator.deduplicate(cacheKey, async () => {
-    const response = await fetch(`/api/logs?type=${type}&limit=${limit}&offset=${offset}`);
-    const data = await response.json();
-    apiCache.set(cacheKey, data, 30 * 1000); // 30秒缓存
-    return data;
+  const params = new URLSearchParams({
+    type,
+    limit: limit.toString(),
+    offset: offset.toString()
   });
+  
+  const res = await fetch(`/api/logs?${params}`);
+  if (!res.ok) {
+    throw new Error(`HTTP ${res.status}: ${res.statusText}`);
+  }
+  
+  return res.json();
 }
 
 export async function clearLogs(type: string = 'all'): Promise<{ success: boolean; message?: string; error?: string }> {
-  const response = await fetch('/api/logs', {
-    method: 'DELETE',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ type })
-  });
-  const data = await response.json();
+  const params = new URLSearchParams({ type });
   
-  // 清除相关缓存
-  apiCache.clear();
-  return data;
+  const res = await fetch(`/api/logs?${params}`, {
+    method: 'DELETE'
+  });
+  
+  if (!res.ok) {
+    throw new Error(`HTTP ${res.status}: ${res.statusText}`);
+  }
+  
+  return res.json();
 }
 
 export async function logOperation(action: string, details: string, status: 'success' | 'error' | 'warning' = 'success'): Promise<void> {
@@ -334,11 +269,9 @@ export async function logNotification(domain: string, notification_method: strin
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
         type: 'notification',
-        action: 'send_notification',
-        details: `域名: ${domain}, 通知方式: ${notification_method}`,
-        status,
         domain,
         notification_method,
+        status,
         message,
         error_details
       })
@@ -364,11 +297,4 @@ export async function logSystem(action: string, details: string, status: 'succes
   } catch (error) {
     console.error('记录系统日志失败:', error);
   }
-}
-
-// 导出缓存管理函数
-export const clearAPICache = () => apiCache.clear();
-export const getCacheStats = () => ({
-  size: 0, // 隐藏内部实现细节
-  keys: []
-}); 
+} 
