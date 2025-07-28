@@ -197,7 +197,7 @@ const LogsModal: React.FC<LogsModalProps> = ({ isOpen, onClose }) => {
                 className="form-select" 
                 value={logType} 
                 onChange={(e) => {
-                  setLogType(e.target.value as 'all' | 'operation' | 'notification' | 'access');
+                  setLogType(e.target.value as 'all' | 'operation' | 'notification' | 'access' | 'system');
                   setCurrentPage(1);
                 }}
               >
