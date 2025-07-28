@@ -34,18 +34,6 @@ CREATE TABLE IF NOT EXISTS domains (
   status TEXT NOT NULL DEFAULT 'active',
   renewUrl TEXT
 );
-CREATE INDEX IF NOT EXISTS idx_domains_domain ON domains(domain);
-CREATE INDEX IF NOT EXISTS idx_domains_expire_date ON domains(expire_date);
-
-CREATE TABLE IF NOT EXISTS notification_settings (
-  id INTEGER PRIMARY KEY AUTOINCREMENT,
-  warning_days TEXT NOT NULL,
-  notification_enabled TEXT NOT NULL,
-  notification_interval TEXT NOT NULL,
-  notification_method TEXT NOT NULL,
-  created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-  updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
-);
 
 CREATE TABLE IF NOT EXISTS logs (
   id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -61,8 +49,23 @@ CREATE TABLE IF NOT EXISTS logs (
   notification_method TEXT,
   error_details TEXT
 );
+
+CREATE TABLE IF NOT EXISTS notification_settings (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  warning_days TEXT NOT NULL,
+  notification_enabled TEXT NOT NULL,
+  notification_interval TEXT NOT NULL,
+  notification_method TEXT NOT NULL,
+  created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+  updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE INDEX IF NOT EXISTS idx_domains_domain ON domains(domain);
+CREATE INDEX IF NOT EXISTS idx_domains_status ON domains(status);
+CREATE INDEX IF NOT EXISTS idx_domains_expire_date ON domains(expire_date);
 CREATE INDEX IF NOT EXISTS idx_logs_timestamp ON logs(timestamp);
 CREATE INDEX IF NOT EXISTS idx_logs_type ON logs(type);
+CREATE INDEX IF NOT EXISTS idx_logs_domain ON logs(domain);
 ```
 
 ## 🔧 环境变量配置
