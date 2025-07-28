@@ -255,10 +255,7 @@ export const onRequest = async (context: any) => {
               
               const responseData = await telegramResponse.json();
               
-              // 记录通知日志
-              for (const domain of expiringDomains) {
-                await logNotificationDetail(env, 'NOTIFY_LOG', `记录Telegram通知日志`, 'success', domain.domain, 'telegram');
-              }
+              // 移除通知API中的日志记录，由前端统一记录
               
               results.push({ method: 'telegram', ok: true });
               
