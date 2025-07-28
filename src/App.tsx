@@ -190,24 +190,7 @@ const App: React.FC = () => {
     };
   }, []);
 
-  useEffect(() => {
-    // 只在有域名数据且没有禁用提醒时检查
-    if (!dontRemindToday && domains.length > 0 && !isCheckingExpiring) {
-      checkExpiringDomains(domains).catch(error => {
-        console.error('检查到期域名时出错:', error);
-        // 记录检查失败的系统日志
-        const deviceInfo = getDeviceInfo();
-        logSystem(
-          'check_error',
-          `检查到期域名时发生错误: ${error instanceof Error ? error.message : '未知错误'}`,
-          'error',
-          deviceInfo
-        ).catch(logError => {
-          console.error('记录系统日志失败:', logError);
-        });
-      });
-    }
-  }, [dontRemindToday, isCheckingExpiring, domains.length]); // 添加 domains.length 依赖
+  // 移除 useEffect 中的检查，改为在 loadDomains 中直接调用，避免重复触发
 
   // 数据加载函数
   async function loadDomains() {
@@ -215,7 +198,22 @@ const App: React.FC = () => {
     try {
       const data = await fetchDomains();
       setDomains(data);
-      // 移除这里的重复检查，让 useEffect 来处理
+      // 域名加载完成后触发检查
+      if (!dontRemindToday && data.length > 0 && !isCheckingExpiring) {
+        checkExpiringDomains(data).catch(error => {
+          console.error('检查到期域名时出错:', error);
+          // 记录检查失败的系统日志
+          const deviceInfo = getDeviceInfo();
+          logSystem(
+            'check_error',
+            `检查到期域名时发生错误: ${error instanceof Error ? error.message : '未知错误'}`,
+            'error',
+            deviceInfo
+          ).catch(logError => {
+            console.error('记录系统日志失败:', logError);
+          });
+        });
+      }
     } catch (error: any) {
       const errorMessage = error.message || '加载域名失败';
       setOpMsg(`加载失败: ${errorMessage}`);
@@ -292,6 +290,11 @@ const App: React.FC = () => {
     }
     if (isCheckingExpiring) {
       return; // 防止重复检查
+    }
+    
+    // 添加额外的防重复检查
+    if (notificationSentToday) {
+      return; // 如果今天已经发送过通知，直接返回
     }
     
     setIsCheckingExpiring(true);
