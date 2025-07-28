@@ -193,20 +193,10 @@ const App: React.FC = () => {
   useEffect(() => {
     // 只在有域名数据且没有禁用提醒时检查
     if (!dontRemindToday && domains.length > 0 && !isCheckingExpiring) {
-      // 记录系统日志 - 开始检查
-      const deviceInfo = getDeviceInfo();
-      logSystem(
-        'daily_check',
-        `开始每日到期域名检查，域名总数: ${domains.length}`,
-        'success',
-        deviceInfo
-      ).catch(error => {
-        console.error('记录系统日志失败:', error);
-      });
-      
       checkExpiringDomains(domains).catch(error => {
         console.error('检查到期域名时出错:', error);
         // 记录检查失败的系统日志
+        const deviceInfo = getDeviceInfo();
         logSystem(
           'check_error',
           `检查到期域名时发生错误: ${error instanceof Error ? error.message : '未知错误'}`,
