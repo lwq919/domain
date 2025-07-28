@@ -26,6 +26,19 @@ export function getDaysColor(daysLeft: number): string {
   return '#fff';
 }
 
+// 根据到期天数和警告天数动态计算域名状态
+export function getDynamicStatus(expire_date: string, warningDays: number = 15): string {
+  const daysLeft = getDaysLeft(expire_date);
+  
+  if (daysLeft <= 0) {
+    return 'expired'; // 已过期
+  } else if (daysLeft <= warningDays) {
+    return 'expired'; // 即将到期（使用相同的状态标签）
+  } else {
+    return 'active'; // 正常
+  }
+}
+
 export function parseCSVLine(line: string): string[] {
   const result: string[] = [];
   let current = '';
