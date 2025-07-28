@@ -385,7 +385,7 @@ const App: React.FC = () => {
           setExpireModal(true);
         }
         
-        // 记录找到到期域名的日志
+        // 先记录找到到期域名的日志
         logSystem(
           'expiring_domains_found',
           `找到 ${expiring.length} 个即将到期的域名，警告天数: ${localWarningDays}天`,
@@ -395,7 +395,7 @@ const App: React.FC = () => {
           console.error('记录系统日志失败:', error);
         });
         
-        // 发送通知（只发送一次）
+        // 然后处理通知发送
         if (!notificationSentToday) {
           try {
             await notifyExpiring(expiring);
