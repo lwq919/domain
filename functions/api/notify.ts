@@ -12,12 +12,6 @@ export interface NotificationSettings {
   notificationEnabled: string;
   notificationInterval: string;
   notificationMethods: string[];
-  emailConfig?: string;
-  telegramBotToken?: string;
-  telegramChatId?: string;
-  wechatSendKey?: string;
-  qqKey?: string;
-  webhookUrl?: string;
 }
 
 // 详细的日志记录函数
@@ -81,11 +75,11 @@ export const onRequest = async (context: any) => {
   const method = request.method.toUpperCase();
 
   if (method === 'GET') {
-    // 查询通知设置
-    try {
-      const { results } = await env.DB.prepare(
-        'SELECT warning_days as warningDays, notification_enabled as notificationEnabled, notification_interval as notificationInterval, notification_method as notificationMethods, email_config as emailConfig, telegram_bot_token as telegramBotToken, telegram_chat_id as telegramChatId, wechat_send_key as wechatSendKey, qq_key as qqKey, webhook_url as webhookUrl FROM notification_settings LIMIT 1'
-      ).all();
+          // 查询通知设置
+      try {
+        const { results } = await env.DB.prepare(
+          'SELECT warning_days as warningDays, notification_enabled as notificationEnabled, notification_interval as notificationInterval, notification_method as notificationMethods FROM notification_settings LIMIT 1'
+        ).all();
       
       if (results.length === 0) {
         return new Response(JSON.stringify({ success: true, settings: null }), {
@@ -122,18 +116,12 @@ export const onRequest = async (context: any) => {
         
         await env.DB.exec('DELETE FROM notification_settings');
         await env.DB.prepare(
-          'INSERT INTO notification_settings (warning_days, notification_enabled, notification_interval, notification_method, email_config, telegram_bot_token, telegram_chat_id, wechat_send_key, qq_key, webhook_url) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)'
+          'INSERT INTO notification_settings (warning_days, notification_enabled, notification_interval, notification_method) VALUES (?, ?, ?, ?)'
         ).bind(
           s.warningDays, 
           s.notificationEnabled, 
           s.notificationInterval, 
-          JSON.stringify(s.notificationMethods || []),
-          s.emailConfig || null,
-          s.telegramBotToken || null,
-          s.telegramChatId || null,
-          s.wechatSendKey || null,
-          s.qqKey || null,
-          s.webhookUrl || null
+          JSON.stringify(s.notificationMethods || [])
         ).run();
         
         await logNotificationDetail(env, 'SAVE_SETTINGS', '通知设置保存成功', 'success');
@@ -142,11 +130,10 @@ export const onRequest = async (context: any) => {
         });
       }
       
-      // 多方式通知分发
-      if (body.domains) {
-        // 从环境变量获取通知配置
-        let notifyMethods: string[] = [];
-        let settings: any = {};
+              // 多方式通知分发
+        if (body.domains) {
+          // 从环境变量获取通知配置
+          let notifyMethods: string[] = [];
         
         // 检查环境变量中配置的通知方式
         const envMethods = [];
@@ -167,10 +154,9 @@ export const onRequest = async (context: any) => {
           // 否则从数据库获取配置
           try {
             const { results } = await env.DB.prepare(
-              'SELECT notification_method, email_config, telegram_bot_token, telegram_chat_id, wechat_send_key, qq_key, webhook_url FROM notification_settings LIMIT 1'
+              'SELECT notification_method FROM notification_settings LIMIT 1'
             ).all();
             if (results.length > 0) {
-              settings = results[0];
               const val = results[0].notification_method;
               if (Array.isArray(val)) {
                 notifyMethods = val;
@@ -179,7 +165,7 @@ export const onRequest = async (context: any) => {
                   notifyMethods = JSON.parse(val);
                 } catch (error) {
                   console.error('解析通知方法失败:', error);
-                  notifyMethods = ['telegram']; // 默认使用telegram
+                  notifyMethods = ['telegram'];
                 }
               }
             }
@@ -193,7 +179,7 @@ export const onRequest = async (context: any) => {
         }
         
         // 从数据库获取警告天数设置
-        let warningDays = 15; // 默认15天
+        let warningDays = 15;
         try {
           const { results } = await env.DB.prepare(
             'SELECT warning_days FROM notification_settings LIMIT 1'
@@ -220,8 +206,8 @@ export const onRequest = async (context: any) => {
           try {
             if (method === 'telegram') {
               // Telegram 通知逻辑
-              const botToken = env.TG_BOT_TOKEN || settings.telegram_bot_token;
-              const chatId = env.TG_USER_ID || settings.telegram_chat_id;
+              const botToken = env.TG_BOT_TOKEN;
+              const chatId = env.TG_USER_ID;
               
               if (!botToken || !chatId) {
                 const error = 'Telegram配置未设置';
@@ -254,13 +240,12 @@ export const onRequest = async (context: any) => {
               }
               
               const responseData = await telegramResponse.json();
-              
-              // 移除通知API中的日志记录，由前端统一记录
+          
               
               results.push({ method: 'telegram', ok: true });
               
             } else if (method === 'wechat') {
-              const sendKey = env.WECHAT_SENDKEY || settings.wechat_send_key;
+              const sendKey = env.WECHAT_SENDKEY;
               if (!sendKey) {
                 const error = '未配置微信SendKey';
                 await logNotificationDetail(env, 'WECHAT_ERROR', error, 'error', undefined, 'wechat', error);
@@ -279,7 +264,7 @@ export const onRequest = async (context: any) => {
               results.push({ method: 'wechat', ok: true });
               
             } else if (method === 'qq') {
-              const key = env.QMSG_KEY || settings.qq_key;
+              const key = env.QMSG_KEY;
               const qq = env.QMSG_QQ;
               if (!key || !qq) {
                 const error = '未配置Qmsg酱 key 或 QQ号';
