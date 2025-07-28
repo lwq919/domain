@@ -21,16 +21,17 @@ async function logNotificationDetail(env: any, action: string, details: string, 
     const logMessage = `[${timestamp}] ${action}: ${details}`;
     console.log(logMessage);
     
-    // 记录到数据库
+    // 记录到统一日志表
     await env.DB.prepare(
-      'INSERT INTO notification_logs (domain, notification_method, status, message, error_details, timestamp) VALUES (?, ?, ?, ?, ?, ?)'
+      'INSERT INTO logs (type, action, details, status, domain, notification_method, error_details) VALUES (?, ?, ?, ?, ?, ?, ?)'
     ).bind(
+      'notification',
+      action,
+      details,
+      status,
       domain || 'system',
       method || 'system',
-      status,
-      details,
-      error || null,
-      timestamp
+      error || null
     ).run();
   } catch (error) {
     console.error('记录通知日志失败:', error);
@@ -75,11 +76,11 @@ export const onRequest = async (context: any) => {
   const method = request.method.toUpperCase();
 
   if (method === 'GET') {
-          // 查询通知设置
-      try {
-        const { results } = await env.DB.prepare(
-          'SELECT warning_days as warningDays, notification_enabled as notificationEnabled, notification_interval as notificationInterval, notification_method as notificationMethods FROM notification_settings LIMIT 1'
-        ).all();
+    // 查询通知设置
+    try {
+      const { results } = await env.DB.prepare(
+        'SELECT warning_days as warningDays, notification_enabled as notificationEnabled, notification_interval as notificationInterval, notification_method as notificationMethods FROM notification_settings LIMIT 1'
+      ).all();
       
       if (results.length === 0) {
         return new Response(JSON.stringify({ success: true, settings: null }), {
@@ -130,10 +131,11 @@ export const onRequest = async (context: any) => {
         });
       }
       
-              // 多方式通知分发
-        if (body.domains) {
-          // 从环境变量获取通知配置
-          let notifyMethods: string[] = [];
+      // 多方式通知分发
+      if (body.domains) {
+        // 从环境变量获取通知配置
+        let notifyMethods: string[] = [];
+        let settings: any = {};
         
         // 检查环境变量中配置的通知方式
         const envMethods = [];
@@ -165,7 +167,7 @@ export const onRequest = async (context: any) => {
                   notifyMethods = JSON.parse(val);
                 } catch (error) {
                   console.error('解析通知方法失败:', error);
-                  notifyMethods = ['telegram'];
+                  notifyMethods = ['telegram']; // 默认使用telegram
                 }
               }
             }
@@ -179,7 +181,7 @@ export const onRequest = async (context: any) => {
         }
         
         // 从数据库获取警告天数设置
-        let warningDays = 15;
+        let warningDays = 15; // 默认15天
         try {
           const { results } = await env.DB.prepare(
             'SELECT warning_days FROM notification_settings LIMIT 1'
@@ -240,7 +242,8 @@ export const onRequest = async (context: any) => {
               }
               
               const responseData = await telegramResponse.json();
-          
+              
+              // 移除通知API中的日志记录，由前端统一记录
               
               results.push({ method: 'telegram', ok: true });
               
