@@ -20,12 +20,10 @@ interface SettingsModalProps {
   notificationMethods: NotificationMethod[];
   bgImageUrl: string;
   carouselInterval: number;
-  emailConfig?: string;
   telegramBotToken?: string;
   telegramChatId?: string;
   wechatSendKey?: string;
   qqKey?: string;
-  webhookUrl?: string;
   domains: Domain[];
   onSave: (settings: {
     warningDays: string;
@@ -34,12 +32,10 @@ interface SettingsModalProps {
     notificationMethods: NotificationMethod[];
     bgImageUrl: string;
     carouselInterval: number;
-    emailConfig?: string;
     telegramBotToken?: string;
     telegramChatId?: string;
     wechatSendKey?: string;
     qqKey?: string;
-    webhookUrl?: string;
   }) => void;
   onImportDomains: (domains: Domain[]) => void;
   onWebDAVBackup?: () => Promise<void>;
@@ -70,12 +66,10 @@ const SettingsModal: React.FC<SettingsModalProps> = ({
     notificationMethods: [...notificationMethods],
     bgImageUrl,
     carouselInterval,
-    emailConfig: '',
     telegramBotToken: '',
     telegramChatId: '',
     wechatSendKey: '',
-    qqKey: '',
-    webhookUrl: ''
+    qqKey: ''
   });
 
   const [importError, setImportError] = useState<string>('');
@@ -311,15 +305,6 @@ const SettingsModal: React.FC<SettingsModalProps> = ({
               <div className="form-group">
                 <label className="form-label">通知方式：</label>
                 <div className="checkbox-group notification-methods">
-                  <label className="notification-method email-method">
-                    <input
-                      type="checkbox"
-                      checked={form.notificationMethods.includes('email')}
-                      onChange={e => handleNotificationMethodChange('email', e.target.checked)}
-                      disabled={form.notificationEnabled !== 'true'}
-                    />
-                    <span>📧 邮件</span>
-                  </label>
                   <label className="notification-method telegram-method">
                     <input
                       type="checkbox"
@@ -346,15 +331,6 @@ const SettingsModal: React.FC<SettingsModalProps> = ({
                       disabled={form.notificationEnabled !== 'true'}
                     />
                     <span>🐧 QQ (Qmsg酱)</span>
-                  </label>
-                  <label className="notification-method webhook-method">
-                    <input
-                      type="checkbox"
-                      checked={form.notificationMethods.includes('webhook')}
-                      onChange={e => handleNotificationMethodChange('webhook', e.target.checked)}
-                      disabled={form.notificationEnabled !== 'true'}
-                    />
-                    <span>🔗 Webhook</span>
                   </label>
                 </div>
               </div>
