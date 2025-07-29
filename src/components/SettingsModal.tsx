@@ -7,7 +7,7 @@ import {
   importDomainsFromFile, 
   validateDomainData 
 } from '../utils';
-import { verifyAdminPassword } from '../api';
+import { verifyAdminPassword, importCloudflareDomains } from '../api';
 import PasswordModal from './PasswordModal';
 import ConfirmModal from './ConfirmModal';
 
@@ -77,6 +77,9 @@ const SettingsModal: React.FC<SettingsModalProps> = ({
   const [webdavError, setWebdavError] = useState<string>('');
   const [webdavSuccess, setWebdavSuccess] = useState<string>('');
   const [webdavLoading, setWebdavLoading] = useState(false);
+  const [cloudflareLoading, setCloudflareLoading] = useState(false);
+  const [cloudflareError, setCloudflareError] = useState<string>('');
+  const [cloudflareSuccess, setCloudflareSuccess] = useState<string>('');
   const [passwordModal, setPasswordModal] = useState(false);
   const [alertModal, setAlertModal] = useState(false);
   const [alertMessage, setAlertMessage] = useState('');
@@ -186,6 +189,27 @@ const SettingsModal: React.FC<SettingsModalProps> = ({
       setWebdavError(error instanceof Error ? error.message : '恢复失败');
     } finally {
       setWebdavLoading(false);
+    }
+  };
+
+  // 处理Cloudflare导入
+  const handleCloudflareImport = async () => {
+    setCloudflareLoading(true);
+    setCloudflareError('');
+    setCloudflareSuccess('');
+    
+    try {
+      // 直接调用API，后端会从环境变量获取API密钥
+      const result = await importCloudflareDomains();
+      
+      if (result.domains) {
+        onImportDomains(result.domains);
+        setCloudflareSuccess(`成功导入 ${result.stats?.total || result.domains.length} 个域名`);
+      }
+    } catch (error) {
+      setCloudflareError(error instanceof Error ? error.message : '导入失败');
+    } finally {
+      setCloudflareLoading(false);
     }
   };
 
@@ -431,6 +455,14 @@ const SettingsModal: React.FC<SettingsModalProps> = ({
                   >
                     📂 选择文件
                   </button>
+                  <button
+                    type="button"
+                    className="btn btn-import"
+                    onClick={handleCloudflareImport}
+                    disabled={cloudflareLoading}
+                  >
+                    {cloudflareLoading ? '🔄 导入中...' : '☁️ 导入Cloudflare域名'}
+                  </button>
                 </div>
                 <small className="form-hint">支持JSON、CSV、TXT格式，导入的数据将替换当前所有域名数据</small>
               </div>
@@ -454,6 +486,27 @@ const SettingsModal: React.FC<SettingsModalProps> = ({
                     <polyline points="22,4 12,14.01 9,11.01" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
                   </svg>
                   <span>{importSuccess}</span>
+                </div>
+              )}
+
+              {cloudflareError && (
+                <div className="import-error">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="2"/>
+                    <line x1="15" y1="9" x2="9" y2="15" stroke="currentColor" strokeWidth="2"/>
+                    <line x1="9" y1="9" x2="15" y2="15" stroke="currentColor" strokeWidth="2"/>
+                  </svg>
+                  <span>{cloudflareError}</span>
+                </div>
+              )}
+
+              {cloudflareSuccess && (
+                <div className="import-success">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                    <polyline points="22,4 12,14.01 9,11.01" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                  </svg>
+                  <span>{cloudflareSuccess}</span>
                 </div>
               )}
             </div>
