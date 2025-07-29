@@ -297,4 +297,35 @@ export async function logSystem(action: string, details: string, status: 'succes
   } catch (error) {
     console.error('记录系统日志失败:', error);
   }
+}
+
+export interface CloudflareImportResponse {
+  success: boolean;
+  message?: string;
+  domains?: Domain[];
+  stats?: {
+    total: number;
+    new: number;
+    updated: number;
+  };
+  error?: string;
+}
+
+export async function importCloudflareDomains(): Promise<CloudflareImportResponse> {
+  const res = await fetchWithRetry('/api/cloudflare', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({})
+  });
+  
+  if (!res.ok) {
+    throw new Error(`HTTP ${res.status}: ${res.statusText}`);
+  }
+  
+  const data = await res.json();
+  if (!data.success) {
+    throw new Error(data.error || '导入失败');
+  }
+  
+  return data;
 } 
